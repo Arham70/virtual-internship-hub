@@ -1,20 +1,43 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from .models import User, StudentProfile, MentorProfile, DOMAIN_CHOICES, SKILL_LEVEL_CHOICES
+from .models import User, StudentProfile, MentorProfile, Domain, SKILL_LEVEL_CHOICES
+
+class DomainSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Domain
+        fields = ('id', 'name', 'code', 'description')
 
 class StudentProfileSerializer(serializers.ModelSerializer):
+    target_domains = DomainSerializer(many=True, read_only=True)
+    target_domain_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Domain.objects.all(),
+        source='target_domains',
+        write_only=True,
+        required=False
+    )
+    
     class Meta:
         model = StudentProfile
         fields = ('first_name', 'last_name', 'phone_number', 'bio', 
-                  'current_skill_level', 'created_at', 'updated_at')
+                  'current_skill_level', 'target_domains', 'target_domain_ids',
+                  'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at')
 
 class MentorProfileSerializer(serializers.ModelSerializer):
+    expertise_domain = DomainSerializer(read_only=True)
+    expertise_domain_id = serializers.PrimaryKeyRelatedField(
+        queryset=Domain.objects.all(),
+        source='expertise_domain',
+        write_only=True,
+        required=False
+    )
+    
     class Meta:
         model = MentorProfile
-        fields = ('professional_bio', 'expertise_area', 'years_of_experience',
-                  'is_available', 'created_at', 'updated_at')
+        fields = ('professional_bio', 'expertise_domain', 'expertise_domain_id',
+                  'years_of_experience', 'is_available', 'created_at', 'updated_at')
         read_only_fields = ('created_at', 'updated_at')
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'username', 'role', 'created_at',
-                  'target_domain', 'student_profile', 'mentor_profile')
+                  'student_profile', 'mentor_profile')
         read_only_fields = ('id', 'created_at')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -38,7 +61,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     # Student fields
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
-    target_domain = serializers.ChoiceField(choices=DOMAIN_CHOICES, write_only=True, required=False)
+    target_domain_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False,
+        allow_empty=True
+    )
     current_skill_level = serializers.ChoiceField(
         choices=SKILL_LEVEL_CHOICES, 
         write_only=True, 
@@ -47,13 +75,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     # Mentor fields
     professional_bio = serializers.CharField(write_only=True, required=False)
-    expertise_area = serializers.CharField(write_only=True, required=False)
+    expertise_domain_id = serializers.IntegerField(write_only=True, required=False)
     
     class Meta:
         model = User
         fields = ('email', 'username', 'password', 'password_confirm', 'role',
-                  'first_name', 'last_name', 'target_domain', 'current_skill_level',
-                  'professional_bio', 'expertise_area')
+                  'first_name', 'last_name', 'target_domain_ids', 'current_skill_level',
+                  'professional_bio', 'expertise_domain_id')
     
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -64,8 +92,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             if not attrs.get('first_name') or not attrs.get('last_name'):
                 raise serializers.ValidationError("First name and last name required for students")
         elif role == 'MENTOR':
-            if not attrs.get('professional_bio') or not attrs.get('expertise_area'):
-                raise serializers.ValidationError("Professional bio and expertise area required for mentors")
+            if not attrs.get('professional_bio'):
+                raise serializers.ValidationError("Professional bio required for mentors")
+            if not attrs.get('expertise_domain_id'):
+                raise serializers.ValidationError("Expertise domain required for mentors")
         
         return attrs
     
@@ -79,18 +109,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Username already exists")
         return value
     
+    def validate_expertise_domain_id(self, value):
+        if value and not Domain.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Invalid domain selected")
+        return value
+    
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         role = validated_data.pop('role', 'STUDENT')
         
         first_name = validated_data.pop('first_name', None)
         last_name = validated_data.pop('last_name', None)
-        target_domain = validated_data.pop('target_domain', None)
+        target_domain_ids = validated_data.pop('target_domain_ids', [])
         current_skill_level = validated_data.pop('current_skill_level', None)
         professional_bio = validated_data.pop('professional_bio', None)
-        expertise_area = validated_data.pop('expertise_area', None)
+        expertise_domain_id = validated_data.pop('expertise_domain_id', None)
         
-        user = User.objects.create_user(role=role, target_domain=target_domain, **validated_data)
+        user = User.objects.create_user(role=role, **validated_data)
         
         # Update profile (signal creates it, we just update)
         if role == 'STUDENT' and hasattr(user, 'student_profile'):
@@ -98,9 +133,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user.student_profile.last_name = last_name or ''
             user.student_profile.current_skill_level = current_skill_level
             user.student_profile.save()
+            # Add target domains
+            if target_domain_ids:
+                domains = Domain.objects.filter(id__in=target_domain_ids)
+                user.student_profile.target_domains.set(domains)
         elif role == 'MENTOR' and hasattr(user, 'mentor_profile'):
             user.mentor_profile.professional_bio = professional_bio or ''
-            user.mentor_profile.expertise_area = expertise_area or ''
+            if expertise_domain_id:
+                domain = Domain.objects.get(id=expertise_domain_id)
+                user.mentor_profile.expertise_domain = domain
             user.mentor_profile.save()
         
         return user

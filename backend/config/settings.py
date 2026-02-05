@@ -161,3 +161,4 @@ SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 86400  # 24 hours
 
+

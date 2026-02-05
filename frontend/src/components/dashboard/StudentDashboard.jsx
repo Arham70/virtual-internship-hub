@@ -28,7 +28,11 @@ const StudentDashboard = () => {
             <h3>Profile Information</h3>
             <p><strong>Name:</strong> {user?.student_profile?.first_name} {user?.student_profile?.last_name}</p>
             <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Target Domain:</strong> {user?.target_domain || 'Not set'}</p>
+            <p><strong>Target Domains:</strong> {
+              user?.student_profile?.target_domains?.length > 0
+                ? user.student_profile.target_domains.map(d => d.name).join(', ')
+                : 'Not set'
+            }</p>
             <p><strong>Skill Level:</strong> {user?.student_profile?.current_skill_level || 'Not set'}</p>
           </div>
         </div>

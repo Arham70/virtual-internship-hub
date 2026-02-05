@@ -69,6 +69,7 @@ export const authAPI = {
   updateMentorProfile: (data) => api.put('/accounts/mentor-profile/', data),
   getStudents: () => api.get('/accounts/students/'),
   getMentors: () => api.get('/accounts/mentors/'),
+  getDomains: () => api.get('/accounts/domains/'),
 };
 
 export default api;

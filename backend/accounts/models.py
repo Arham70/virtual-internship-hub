@@ -12,16 +12,19 @@ SKILL_LEVEL_CHOICES = [
     ('EXPERT', 'Expert'),
 ]
 
-DOMAIN_CHOICES = [
-    ('GRAPHIC_DESIGN', 'Graphic Design'),
-    ('CONTENT_WRITING', 'Content Writing'),
-    ('PROGRAMMING', 'Programming'),
-    ('FREELANCING', 'Freelancing'),
-    ('E_COMMERCE', 'E-Commerce'),
-    ('QUICKBOOKS', 'QuickBooks'),
-    ('AUTOCAD', 'AutoCAD'),
-    ('OTHER', 'Other'),
-]
+# Domain Model for managing domains
+class Domain(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    code = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'domains'
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
 
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, role='STUDENT', **extra_fields):
@@ -55,14 +58,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
-    
-    # Target domain (used for filtering and recommendations)
-    target_domain = models.CharField(
-        max_length=50, 
-        choices=DOMAIN_CHOICES, 
-        blank=True, 
-        null=True
-    )
     
     objects = UserManager()
     
@@ -107,6 +102,13 @@ class StudentProfile(models.Model):
         null=True
     )
     
+    # Multiple target domains for students
+    target_domains = models.ManyToManyField(
+        Domain,
+        related_name='students',
+        blank=True
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -124,7 +126,14 @@ class MentorProfile(models.Model):
         primary_key=True
     )
     professional_bio = models.TextField()
-    expertise_area = models.CharField(max_length=200)
+    # Single domain expertise for mentors
+    expertise_domain = models.ForeignKey(
+        Domain,
+        on_delete=models.SET_NULL,
+        related_name='mentors',
+        null=True,
+        blank=True
+    )
     years_of_experience = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

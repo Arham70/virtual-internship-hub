@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { authAPI } from '../../services/api';
 import './Auth.css';
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const [domains, setDomains] = useState([]);
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -14,22 +16,57 @@ const Register = () => {
     role: 'STUDENT',
     first_name: '',
     last_name: '',
-    target_domain: '',
+    target_domain_ids: [],
     current_skill_level: '',
     professional_bio: '',
-    expertise_area: '',
+    expertise_domain_id: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [loadingDomains, setLoadingDomains] = useState(true);
+
+  useEffect(() => {
+    // Fetch domains on component mount
+    const fetchDomains = async () => {
+      try {
+        const response = await authAPI.getDomains();
+        setDomains(response.data);
+      } catch (error) {
+        console.error('Failed to fetch domains:', error);
+      } finally {
+        setLoadingDomains(false);
+      }
+    };
+    fetchDomains();
+  }, []);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
     }
+  };
+
+  const handleDomainChange = (domainId) => {
+    const domainIdNum = parseInt(domainId);
+    setFormData(prev => {
+      const currentIds = prev.target_domain_ids || [];
+      if (currentIds.includes(domainIdNum)) {
+        return {
+          ...prev,
+          target_domain_ids: currentIds.filter(id => id !== domainIdNum)
+        };
+      } else {
+        return {
+          ...prev,
+          target_domain_ids: [...currentIds, domainIdNum]
+        };
+      }
+    });
   };
 
   const validateForm = () => {
@@ -50,7 +87,7 @@ const Register = () => {
       if (!formData.last_name) newErrors.last_name = 'Last name is required';
     } else if (formData.role === 'MENTOR') {
       if (!formData.professional_bio) newErrors.professional_bio = 'Professional bio is required';
-      if (!formData.expertise_area) newErrors.expertise_area = 'Expertise area is required';
+      if (!formData.expertise_domain_id) newErrors.expertise_domain_id = 'Expertise domain is required';
     }
     
     setErrors(newErrors);
@@ -76,11 +113,17 @@ const Register = () => {
     if (formData.role === 'STUDENT') {
       registrationData.first_name = formData.first_name;
       registrationData.last_name = formData.last_name;
-      if (formData.target_domain) registrationData.target_domain = formData.target_domain;
-      if (formData.current_skill_level) registrationData.current_skill_level = formData.current_skill_level;
+      if (formData.target_domain_ids.length > 0) {
+        registrationData.target_domain_ids = formData.target_domain_ids;
+      }
+      if (formData.current_skill_level) {
+        registrationData.current_skill_level = formData.current_skill_level;
+      }
     } else if (formData.role === 'MENTOR') {
       registrationData.professional_bio = formData.professional_bio;
-      registrationData.expertise_area = formData.expertise_area;
+      if (formData.expertise_domain_id) {
+        registrationData.expertise_domain_id = parseInt(formData.expertise_domain_id);
+      }
     }
     
     const result = await register(registrationData);
@@ -195,23 +238,24 @@ const Register = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="target_domain">Target Domain (Optional)</label>
-                <select
-                  id="target_domain"
-                  name="target_domain"
-                  value={formData.target_domain}
-                  onChange={handleChange}
-                >
-                  <option value="">Select a domain</option>
-                  <option value="GRAPHIC_DESIGN">Graphic Design</option>
-                  <option value="CONTENT_WRITING">Content Writing</option>
-                  <option value="PROGRAMMING">Programming</option>
-                  <option value="FREELANCING">Freelancing</option>
-                  <option value="E_COMMERCE">E-Commerce</option>
-                  <option value="QUICKBOOKS">QuickBooks</option>
-                  <option value="AUTOCAD">AutoCAD</option>
-                  <option value="OTHER">Other</option>
-                </select>
+                <label>Target Domains (Select Multiple)</label>
+                {loadingDomains ? (
+                  <div>Loading domains...</div>
+                ) : (
+                  <div className="checkbox-group">
+                    {domains.map(domain => (
+                      <label key={domain.id} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={formData.target_domain_ids.includes(domain.id)}
+                          onChange={() => handleDomainChange(domain.id)}
+                        />
+                        <span>{domain.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {errors.target_domain_ids && <span className="error">{Array.isArray(errors.target_domain_ids) ? errors.target_domain_ids[0] : errors.target_domain_ids}</span>}
               </div>
               
               <div className="form-group">
@@ -249,17 +293,26 @@ const Register = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="expertise_area">Expertise Area</label>
-                <input
-                  type="text"
-                  id="expertise_area"
-                  name="expertise_area"
-                  value={formData.expertise_area}
-                  onChange={handleChange}
-                  required
-                  placeholder="e.g., Web Development, Graphic Design"
-                />
-                {errors.expertise_area && <span className="error">{Array.isArray(errors.expertise_area) ? errors.expertise_area[0] : errors.expertise_area}</span>}
+                <label htmlFor="expertise_domain_id">Expertise Domain</label>
+                {loadingDomains ? (
+                  <div>Loading domains...</div>
+                ) : (
+                  <select
+                    id="expertise_domain_id"
+                    name="expertise_domain_id"
+                    value={formData.expertise_domain_id}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select a domain</option>
+                    {domains.map(domain => (
+                      <option key={domain.id} value={domain.id}>
+                        {domain.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.expertise_domain_id && <span className="error">{Array.isArray(errors.expertise_domain_id) ? errors.expertise_domain_id[0] : errors.expertise_domain_id}</span>}
               </div>
             </>
           )}
@@ -292,7 +345,7 @@ const Register = () => {
             {errors.password_confirm && <span className="error">{Array.isArray(errors.password_confirm) ? errors.password_confirm[0] : errors.password_confirm}</span>}
           </div>
           
-          <button type="submit" className="btn-primary" disabled={loading}>
+          <button type="submit" className="btn-primary" disabled={loading || loadingDomains}>
             {loading ? 'Registering...' : 'Register'}
           </button>
           
@@ -306,4 +359,3 @@ const Register = () => {
 };
 
 export default Register;
-

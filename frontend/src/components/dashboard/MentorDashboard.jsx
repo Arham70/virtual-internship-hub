@@ -27,7 +27,7 @@ const MentorDashboard = () => {
           <div className="info-card">
             <h3>Profile Information</h3>
             <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Expertise:</strong> {user?.mentor_profile?.expertise_area || 'Not set'}</p>
+            <p><strong>Expertise Domain:</strong> {user?.mentor_profile?.expertise_domain?.name || 'Not set'}</p>
             <p><strong>Experience:</strong> {user?.mentor_profile?.years_of_experience || 0} years</p>
             <p><strong>Available:</strong> {user?.mentor_profile?.is_available ? 'Yes' : 'No'}</p>
           </div>

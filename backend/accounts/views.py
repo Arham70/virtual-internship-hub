@@ -8,9 +8,10 @@ from .serializers import (
     UserLoginSerializer,
     UserSerializer,
     StudentProfileSerializer,
-    MentorProfileSerializer
+    MentorProfileSerializer,
+    DomainSerializer
 )
-from .models import User, StudentProfile, MentorProfile
+from .models import User, StudentProfile, MentorProfile, Domain
 
 # Registration
 class RegisterView(generics.CreateAPIView):
@@ -153,4 +154,10 @@ class MentorListView(generics.ListAPIView):
             return MentorProfile.objects.filter(is_available=True)
         # Admins and mentors see all
         return MentorProfile.objects.all()
+
+# List Domains
+class DomainListView(generics.ListAPIView):
+    serializer_class = DomainSerializer
+    permission_classes = [permissions.AllowAny]
+    queryset = Domain.objects.all()
 

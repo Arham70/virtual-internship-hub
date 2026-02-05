@@ -102,3 +102,4 @@ After successful setup:
 3. Verify profile creation works correctly
 4. Check that role-based access control works
 
+
