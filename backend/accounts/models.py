@@ -1,7 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 # Choices
@@ -145,20 +143,22 @@ class MentorProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - Mentor"
 
-# Signal to create profile automatically
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        if instance.is_student:
-            StudentProfile.objects.create(
-                user=instance,
-                first_name=instance.username,
-                last_name=''
-            )
-        elif instance.is_mentor:
-            MentorProfile.objects.create(
-                user=instance,
-                professional_bio='',
-                expertise_area=''
-            )
+
+class PasswordResetOTP(models.Model):
+    """OTP for forgot password. Expires in 2 minutes."""
+    email = models.EmailField(db_index=True)
+    otp = models.CharField(max_length=6)
+    expires_at = models.DateTimeField(db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'password_reset_otps'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"OTP for {self.email} (expires {self.expires_at})"
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
 

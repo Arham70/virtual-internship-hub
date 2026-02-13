@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, StudentProfile, MentorProfile, Domain
+from .models import User, StudentProfile, MentorProfile, Domain, PasswordResetOTP
 
 @admin.register(Domain)
 class DomainAdmin(admin.ModelAdmin):
@@ -33,4 +33,12 @@ class MentorProfileAdmin(admin.ModelAdmin):
     list_filter = ('is_available', 'expertise_domain', 'years_of_experience', 'created_at')
     search_fields = ('user__username', 'user__email', 'professional_bio')
     readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(PasswordResetOTP)
+class PasswordResetOTPAdmin(admin.ModelAdmin):
+    list_display = ('email', 'otp', 'expires_at', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('email',)
+    readonly_fields = ('created_at',)
 

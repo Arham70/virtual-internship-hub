@@ -149,14 +149,16 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
-    
+
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-        
         if email and password:
-            user = authenticate(request=self.context.get('request'),
-                              email=email, password=password)
+            user = authenticate(
+                request=self.context.get('request'),
+                email=email,
+                password=password,
+            )
             if not user:
                 raise serializers.ValidationError('Invalid email or password')
             if not user.is_active:
@@ -164,6 +166,26 @@ class UserLoginSerializer(serializers.Serializer):
             attrs['user'] = user
         else:
             raise serializers.ValidationError('Email and password required')
-        
+        return attrs
+
+
+class SendPasswordResetOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class VerifyPasswordResetOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True, min_length=6, max_length=6)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True, min_length=6, max_length=6)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+    new_password_confirm = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({'new_password_confirm': 'Passwords do not match.'})
         return attrs
 

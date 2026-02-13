@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'drf_yasg',
     'accounts',
 ]
 
@@ -70,9 +71,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME', default='virtual_internship_hub'),
         'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default='1234'),
         'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+        'PORT': config('DB_PORT', default='5433'),
     }
 }
 
@@ -160,5 +161,20 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 86400  # 24 hours
+
+# Email (SMTP) - for OTP and notifications
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.smtp.EmailBackend'
+)
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@virtualinternship.com')
+
+# OTP expiry for password reset (minutes)
+PASSWORD_RESET_OTP_EXPIRE_MINUTES = config('PASSWORD_RESET_OTP_EXPIRE_MINUTES', default=2, cast=int)
 
 

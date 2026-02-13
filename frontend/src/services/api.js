@@ -70,6 +70,12 @@ export const authAPI = {
   getStudents: () => api.get('/accounts/students/'),
   getMentors: () => api.get('/accounts/mentors/'),
   getDomains: () => api.get('/accounts/domains/'),
+  // Forgot password (OTP expires in 2 minutes)
+  sendPasswordResetOTP: (email) => api.post('/accounts/forgot-password/send-otp/', { email }),
+  verifyPasswordResetOTP: (email, otp) => api.post('/accounts/forgot-password/verify-otp/', { email, otp }),
+  resetPassword: (email, otp, new_password, new_password_confirm) =>
+    api.post('/accounts/forgot-password/reset/', { email, otp, new_password, new_password_confirm }),
+  resendPasswordResetOTP: (email) => api.post('/accounts/forgot-password/resend-otp/', { email }),
 };
 
 export default api;
