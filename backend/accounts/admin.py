@@ -2,22 +2,39 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, StudentProfile, MentorProfile, Domain, PasswordResetOTP
 
+
+def only_superuser_can_delete(model_admin, request, obj=None):
+    """Only superadmin (is_superuser) can delete users and profiles."""
+    return request.user.is_superuser
+
+
 @admin.register(Domain)
 class DomainAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'created_at')
     search_fields = ('name', 'code')
     ordering = ('name',)
 
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'role', 'is_active', 'created_at')
-    list_filter = ('role', 'is_active', 'is_staff', 'created_at')
+    list_display = ('username', 'email', 'role', 'is_staff', 'is_superuser', 'is_active', 'created_at')
+    list_filter = ('role', 'is_active', 'is_staff', 'is_superuser', 'created_at')
     search_fields = ('username', 'email')
     ordering = ('-created_at',)
-    
+
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Role Information', {'fields': ('role',)}),
     )
+
+    def has_delete_permission(self, request, obj=None):
+        return only_superuser_can_delete(self, request, obj)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser and 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
@@ -27,12 +44,31 @@ class StudentProfileAdmin(admin.ModelAdmin):
     filter_horizontal = ('target_domains',)
     readonly_fields = ('created_at', 'updated_at')
 
+    def has_delete_permission(self, request, obj=None):
+        return only_superuser_can_delete(self, request, obj)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser and 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+
 @admin.register(MentorProfile)
 class MentorProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'expertise_domain', 'years_of_experience', 'is_available')
     list_filter = ('is_available', 'expertise_domain', 'years_of_experience', 'created_at')
     search_fields = ('user__username', 'user__email', 'professional_bio')
     readonly_fields = ('created_at', 'updated_at')
+
+    def has_delete_permission(self, request, obj=None):
+        return only_superuser_can_delete(self, request, obj)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser and 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
 
 
 @admin.register(PasswordResetOTP)

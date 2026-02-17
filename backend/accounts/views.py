@@ -1,10 +1,10 @@
 """
-All account API views use class-based approach (APIView / generics).
-JWT is used for authentication; AllowAny where needed.
+All API views in one file. Sections: Auth, Student, Mentor, Admin, Domains.
 """
 from rest_framework import status, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
@@ -15,13 +15,17 @@ from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     UserSerializer,
+    CreateAdministratorSerializer,
     StudentProfileSerializer,
     MentorProfileSerializer,
     DomainSerializer,
     SendPasswordResetOTPSerializer,
     VerifyPasswordResetOTPSerializer,
     ResetPasswordSerializer,
+    AdminStudentListItemSerializer,
+    AdminMentorListItemSerializer,
 )
+from .permissions import IsSuperuser, IsAdministrator
 from .services.email import (
     create_and_send_password_reset_otp,
     verify_password_reset_otp,
@@ -29,8 +33,8 @@ from .services.email import (
 )
 
 
-def _tokens_and_user_response(user):
-    """Build standard auth response with user, profile, and JWT tokens."""
+def tokens_and_user_response(user):
+    """Build auth response with user, profile, and JWT tokens."""
     refresh = RefreshToken.for_user(user)
     profile_data = None
     if user.is_student and hasattr(user, 'student_profile'):
@@ -40,17 +44,14 @@ def _tokens_and_user_response(user):
     return {
         'user': UserSerializer(user).data,
         'profile': profile_data,
-        'tokens': {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        },
+        'tokens': {'refresh': str(refresh), 'access': str(refresh.access_token)},
     }
 
 
-# --------------- Auth (AllowAny) ---------------
+# --------------- Auth ---------------
 
 class RegisterView(generics.CreateAPIView):
-    """POST /register/ – Create account (Student or Mentor)."""
+    """POST auth/register/ – Create account (Student or Mentor)."""
     queryset = User.objects.none()
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
@@ -59,13 +60,13 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        data = _tokens_and_user_response(user)
+        data = tokens_and_user_response(user)
         data['message'] = 'Registration successful'
         return Response(data, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
-    """POST /login/ – Login with email/password. Returns JWT tokens."""
+    """POST auth/login/ – Login with email/password. Returns JWT tokens."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -73,13 +74,13 @@ class LoginView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         user = serializer.validated_data['user']
-        data = _tokens_and_user_response(user)
+        data = tokens_and_user_response(user)
         data['message'] = 'Login successful'
         return Response(data, status=status.HTTP_200_OK)
 
 
 class LogoutView(APIView):
-    """POST /logout/ – Blacklist refresh token. Requires JWT."""
+    """POST auth/logout/ – Blacklist refresh token."""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -94,10 +95,7 @@ class LogoutView(APIView):
         return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
 
 
-# --------------- Forgot Password (AllowAny) ---------------
-
 class SendPasswordResetOTPView(APIView):
-    """POST /forgot-password/send-otp/ – Send OTP to email. OTP expires in 2 minutes."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -105,20 +103,13 @@ class SendPasswordResetOTPView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         email = serializer.validated_data['email']
-        record, ok = create_and_send_password_reset_otp(email)
+        _, ok = create_and_send_password_reset_otp(email)
         if not ok:
-            return Response(
-                {'email': 'No account found with this email.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        return Response(
-            {'message': 'OTP sent to your email. It expires in 2 minutes.'},
-            status=status.HTTP_200_OK,
-        )
+            return Response({'email': 'No account found with this email.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'OTP sent to your email. It expires in 2 minutes.'}, status=status.HTTP_200_OK)
 
 
 class VerifyPasswordResetOTPView(APIView):
-    """POST /forgot-password/verify-otp/ – Verify OTP is valid (and not expired)."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -129,18 +120,11 @@ class VerifyPasswordResetOTPView(APIView):
         otp = serializer.validated_data['otp']
         record = verify_password_reset_otp(email, otp)
         if not record:
-            return Response(
-                {'otp': 'Invalid or expired OTP.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {'message': 'OTP verified. You can now reset your password.'},
-            status=status.HTTP_200_OK,
-        )
+            return Response({'otp': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'OTP verified. You can now reset your password.'}, status=status.HTTP_200_OK)
 
 
 class ResetPasswordView(APIView):
-    """POST /forgot-password/reset/ – Set new password after verifying OTP."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -150,34 +134,24 @@ class ResetPasswordView(APIView):
         email = serializer.validated_data['email']
         otp = serializer.validated_data['otp']
         new_password = serializer.validated_data['new_password']
-
         record = verify_password_reset_otp(email, otp)
         if not record:
-            return Response(
-                {'otp': 'Invalid or expired OTP.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+            return Response({'otp': 'Invalid or expired OTP.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             validate_password(new_password)
         except ValidationError as e:
-            return Response(
-                {'new_password': list(e.messages)},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        user = User.objects.get(email=email)
+            return Response({'new_password': list(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'email': 'No account found with this email.'}, status=status.HTTP_404_NOT_FOUND)
         user.set_password(new_password)
         user.save()
         consume_otp(record)
-        return Response(
-            {'message': 'Password reset successful. You can now log in.'},
-            status=status.HTTP_200_OK,
-        )
+        return Response({'message': 'Password reset successful. You can now log in.'}, status=status.HTTP_200_OK)
 
 
 class ResendPasswordResetOTPView(APIView):
-    """POST /forgot-password/resend-otp/ – Resend OTP (same as send-otp, new OTP)."""
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -185,22 +159,14 @@ class ResendPasswordResetOTPView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         email = serializer.validated_data['email']
-        record, ok = create_and_send_password_reset_otp(email)
+        _, ok = create_and_send_password_reset_otp(email)
         if not ok:
-            return Response(
-                {'email': 'No account found with this email.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        return Response(
-            {'message': 'New OTP sent. It expires in 2 minutes.'},
-            status=status.HTTP_200_OK,
-        )
+            return Response({'email': 'No account found with this email.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'New OTP sent. It expires in 2 minutes.'}, status=status.HTTP_200_OK)
 
-
-# --------------- Profile (JWT required) ---------------
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PUT /profile/ – Current user profile."""
+    """GET/PUT auth/profile/ – Current user profile."""
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -208,44 +174,27 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+# --------------- Student ---------------
+
 class StudentProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PUT /student-profile/ – Student profile (students only)."""
+    """GET/PUT students/profile/ – Student profile (students only)."""
     serializer_class = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return getattr(self.request.user, 'student_profile', None)
+        profile = getattr(self.request.user, 'student_profile', None)
+        if profile is None:
+            raise NotFound('Student profile not found.')
+        return profile
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_student:
-            return Response(
-                {'error': 'Only students can access this.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+            return Response({'error': 'Only students can access this.'}, status=status.HTTP_403_FORBIDDEN)
         return super().get(request, *args, **kwargs)
 
-
-class MentorProfileView(generics.RetrieveUpdateAPIView):
-    """GET/PUT /mentor-profile/ – Mentor profile (mentors only)."""
-    serializer_class = MentorProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return getattr(self.request.user, 'mentor_profile', None)
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_mentor:
-            return Response(
-                {'error': 'Only mentors can access this.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().get(request, *args, **kwargs)
-
-
-# --------------- Lists (JWT required) ---------------
 
 class StudentListView(generics.ListAPIView):
-    """GET /students/ – List students (mentors/admins)."""
+    """GET students/ – List students (mentors and admins)."""
     serializer_class = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -255,8 +204,27 @@ class StudentListView(generics.ListAPIView):
         return StudentProfile.objects.none()
 
 
+# --------------- Mentor ---------------
+
+class MentorProfileView(generics.RetrieveUpdateAPIView):
+    """GET/PUT mentors/profile/ – Mentor profile (mentors only)."""
+    serializer_class = MentorProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        profile = getattr(self.request.user, 'mentor_profile', None)
+        if profile is None:
+            raise NotFound('Mentor profile not found.')
+        return profile
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_mentor:
+            return Response({'error': 'Only mentors can access this.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().get(request, *args, **kwargs)
+
+
 class MentorListView(generics.ListAPIView):
-    """GET /mentors/ – List mentors."""
+    """GET mentors/ – List mentors."""
     serializer_class = MentorProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -266,8 +234,41 @@ class MentorListView(generics.ListAPIView):
         return MentorProfile.objects.all()
 
 
+# --------------- Admin ---------------
+
+class CreateAdministratorView(generics.CreateAPIView):
+    """POST admin/administrators/ – Create administrator (superuser only)."""
+    permission_classes = [permissions.IsAuthenticated, IsSuperuser]
+    serializer_class = CreateAdministratorSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class AdminStudentListView(generics.ListAPIView):
+    """GET admin/users/students/ – List all students (admin only). Administrator users are not listed."""
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+    serializer_class = AdminStudentListItemSerializer
+    queryset = User.objects.filter(role='STUDENT').select_related('student_profile').prefetch_related('student_profile__target_domains')
+    pagination_class = None
+
+
+class AdminMentorListView(generics.ListAPIView):
+    """GET admin/users/mentors/ – List all mentors (admin only). Administrator users are not listed."""
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+    serializer_class = AdminMentorListItemSerializer
+    queryset = User.objects.filter(role='MENTOR').select_related('mentor_profile', 'mentor_profile__expertise_domain')
+    pagination_class = None
+
+
+# --------------- Domains (shared) ---------------
+
 class DomainListView(generics.ListAPIView):
-    """GET /domains/ – List domains (public)."""
+    """GET domains/ – List domains (public, unpaginated)."""
     serializer_class = DomainSerializer
     permission_classes = [permissions.AllowAny]
     queryset = Domain.objects.all()
+    pagination_class = None

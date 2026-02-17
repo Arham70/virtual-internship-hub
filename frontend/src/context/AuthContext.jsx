@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authApi } from '../api/auth.api';
 
 const AuthContext = createContext(null);
 
@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await authAPI.getProfile();
-      setUser(response.data);
+      const { data } = await authApi.getProfile();
+      setUser(data);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -42,41 +42,26 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
-      const response = await authAPI.register(formData);
-      const { user, tokens, profile } = response.data;
-      
-      localStorage.setItem('access_token', tokens.access);
-      localStorage.setItem('refresh_token', tokens.refresh);
-      
-      setUser({ ...user, profile });
-      setIsAuthenticated(true);
-      
-      return { success: true, user: { ...user, profile } };
+      const { data } = await authApi.register(formData);
+      const { user: u, profile } = data;
+      // Do not store tokens or set user – redirect to login so they sign in after signup
+      return { success: true, user: { ...u, profile } };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data || { message: 'Registration failed' },
-      };
+      return { success: false, error: error.response?.data || { message: 'Registration failed' } };
     }
   };
 
   const login = async (formData) => {
     try {
-      const response = await authAPI.login(formData);
-      const { user, tokens, profile } = response.data;
-      
+      const { data } = await authApi.login(formData);
+      const { user: u, tokens, profile } = data;
       localStorage.setItem('access_token', tokens.access);
       localStorage.setItem('refresh_token', tokens.refresh);
-      
-      setUser({ ...user, profile });
+      setUser({ ...u, profile });
       setIsAuthenticated(true);
-      
-      return { success: true, user: { ...user, profile } };
+      return { success: true, user: { ...u, profile } };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data || { message: 'Login failed' },
-      };
+      return { success: false, error: error.response?.data || { message: 'Login failed' } };
     }
   };
 
@@ -84,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
-        await authAPI.logout({ refresh_token: refreshToken });
+        await authApi.logout({ refresh_token: refreshToken });
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -110,5 +95,3 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-

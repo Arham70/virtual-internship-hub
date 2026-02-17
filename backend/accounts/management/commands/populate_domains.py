@@ -47,6 +47,8 @@ class Command(BaseCommand):
             
             # Other
             {'name': 'Other', 'code': 'OTHER', 'description': 'Other domains not listed'},
+            # Design
+            {'name': 'UI/UX Design', 'code': 'UI_UX_DESIGN', 'description': 'User interface and user experience design'},
         ]
         
         created_count = 0

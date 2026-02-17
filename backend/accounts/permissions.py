@@ -13,3 +13,9 @@ class IsAdministrator(permissions.BasePermission):
         return request.user.is_authenticated and request.user.is_administrator
 
 
+class IsSuperuser(permissions.BasePermission):
+    """Only superusers (Django admin) can access."""
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.is_superuser
+
+

@@ -1,94 +1,42 @@
 # Virtual Internship Hub – Frontend
 
-React app for login, signup, and role-based dashboards (Student, Mentor, Admin).
+React app: login, signup, forgot password, and role-based dashboards (Student, Mentor, Admin).
 
 ---
 
-## Folder structure
+## What each folder does
 
-```
-frontend/
-├── public/
-│   └── index.html
-├── src/
-│   ├── index.js              ← App entry (renders <App />)
-│   ├── index.css             ← Tailwind + global styles
-│   ├── App.jsx               ← Routes only (login, register, dashboards, 403)
-│   │
-│   ├── context/
-│   │   └── AuthContext.jsx    ← Auth state (user, login, register, logout)
-│   │
-│   ├── services/
-│   │   └── api.js             ← Axios instance + authAPI (login, register, getDomains, etc.)
-│   │
-│   └── components/
-│       ├── auth/              ← Login, Signup, Forgot password
-│       │   ├── index.js       ← Export: AuthPage, ProtectedRoute
-│       │   ├── AuthPage.jsx    ← Main auth screen (switches between login/signup/forgot)
-│       │   ├── AuthLayout.jsx  ← Left panel + right form card
-│       │   ├── AuthLeftPanel.jsx
-│       │   ├── LoginForm.jsx
-│       │   ├── SignupForm.jsx
-│       │   ├── ForgotPasswordForm.jsx
-│       │   ├── FormInput.jsx
-│       │   ├── RoleSwitcher.jsx
-│       │   ├── ProtectedRoute.jsx
-│       │   ├── Icons.jsx
-│       │   ├── MultiSelect.jsx
-│       │   ├── OTPInput.jsx
-│       │   ├── constants.js
-│       │   └── authUtils.js
-│       │
-│       ├── dashboard/         ← Role-specific dashboards
-│       │   ├── index.js       ← Export: StudentDashboard, MentorDashboard, AdminDashboard
-│       │   ├── StudentDashboard.jsx
-│       │   ├── MentorDashboard.jsx
-│       │   ├── AdminDashboard.jsx
-│       │   └── Dashboard.css
-│       │
-│       └── UnauthorizedPage.jsx   ← 403 page
-│
-├── package.json
-├── tailwind.config.js
-├── postcss.config.js
-└── README.md (this file)
-```
+| Folder | Purpose |
+|--------|--------|
+| **`src/api/`** | Backend API layer. Axios client (`client.js`), interceptors, token refresh. One file per area: `auth.api.js`, `student.api.js`, `mentor.api.js`, `admin.api.js`, `domains.api.js`. No UI, no page logic—only HTTP calls. |
+| **`src/components/ui/`** | Reusable UI only: `FormInput`, `MultiSelect`, `OTPInput`, `Icons`. Used by auth and other screens. |
+| **`src/components/auth/`** | Auth flows: `AuthPage` (login/signup/forgot), `LoginForm`, `SignupForm`, `ForgotPasswordForm`, `AuthLayout`, `RoleSwitcher`, `ProtectedRoute`. Imports UI from `components/ui`. |
+| **`src/components/dashboard/`** | Role dashboards: `StudentDashboard`, `MentorDashboard`, `AdminDashboard`. |
+| **`src/components/home/`** | Landing/home page (e.g. role choice before login/register). |
+| **`src/context/`** | Global auth state: `AuthContext` (user, login, register, logout, loading). `AuthProvider` wraps the app in `App.jsx`. |
+| **`src/hooks/`** | API-related hooks: `useDomains`, `useForgotPassword`, `useAuth` (re-export from context). Used by pages to fetch data or trigger API calls. |
+| **`src/services/`** | Page/feature logic only (no HTTP). E.g. `authPage.service.js`: signup validation, building signup payload. Not for raw API calls—those live in `api/`. |
+| **`src/utilities/`** | Shared helpers and constants: `constants.js` (VIEW, ROLE, FORGOT_STEP), `authUtils.js` (redirectByRole, getErrorMessage). Used in multiple places. |
 
 ---
 
-## What lives where
-
-| Folder / file        | Purpose |
-|----------------------|--------|
-| **src/App.jsx**      | Defines all routes; uses AuthProvider, AuthPage, ProtectedRoute, dashboards. |
-| **context/**        | Global auth state (user, login, register, logout). |
-| **services/**       | API calls (authAPI used by AuthContext and AuthPage). |
-| **components/auth/**| Everything for login, signup, forgot password. Import `AuthPage` and `ProtectedRoute` from `./components/auth`. |
-| **components/dashboard/** | Student / Mentor / Admin dashboard screens. Import from `./components/dashboard`. |
-| **components/UnauthorizedPage.jsx** | 403 screen. |
-
----
-
-## How to run
+## Run
 
 ```bash
 npm install
 npm start
 ```
 
-App runs at `http://localhost:3000`. Backend should be at `http://localhost:8000` (see `src/services/api.js`).
+Runs at `http://localhost:3000`. Set `REACT_APP_API_URL` if the backend is not at `http://localhost:8000/api`.
 
 ---
 
 ## Routes
 
-| Path                 | Who can see it        | What shows                    |
-|----------------------|------------------------|-------------------------------|
-| `/`                  | Anyone                 | Redirects to `/login`         |
-| `/login`             | Not logged in          | AuthPage (login form)         |
-| `/register`          | Not logged in          | AuthPage (signup form)        |
-| `/student/dashboard` | Logged-in Student      | StudentDashboard              |
-| `/mentor/dashboard`  | Logged-in Mentor       | MentorDashboard               |
-| `/admin/dashboard`   | Logged-in Admin        | AdminDashboard                |
-| `/dashboard`         | Logged in              | Redirects to role dashboard   |
-| `/unauthorized`      | Anyone                 | UnauthorizedPage (403)        |
+| Path | What |
+|------|------|
+| `/` | Redirects to `/login` or home |
+| `/login`, `/register` | AuthPage (login / signup) |
+| `/student/dashboard`, `/mentor/dashboard`, `/admin/dashboard` | Role dashboards (protected) |
+| `/dashboard` | Redirects to role-specific dashboard |
+| `/unauthorized` | 403 page |

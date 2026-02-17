@@ -43,12 +43,16 @@ class MentorProfileSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     student_profile = StudentProfileSerializer(read_only=True)
     mentor_profile = MentorProfileSerializer(read_only=True)
-    
+    is_superadmin = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'role', 'created_at',
+        fields = ('id', 'email', 'username', 'role', 'is_superuser', 'is_superadmin', 'created_at',
                   'student_profile', 'mentor_profile')
         read_only_fields = ('id', 'created_at')
+
+    def get_is_superadmin(self, obj):
+        return getattr(obj, 'is_superuser', False)
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -88,6 +92,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords don't match")
         
         role = attrs.get('role', 'STUDENT')
+        if role == 'ADMINISTRATOR':
+            raise serializers.ValidationError(
+                "Administrator accounts cannot be created via public registration. "
+                "Use Django admin or the create_admin management command."
+            )
         if role == 'STUDENT':
             if not attrs.get('first_name') or not attrs.get('last_name'):
                 raise serializers.ValidationError("First name and last name required for students")
@@ -146,6 +155,36 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return user
 
+
+class CreateAdministratorSerializer(serializers.Serializer):
+    """Create an administrator (role=ADMINISTRATOR, is_staff=True, is_superuser=False). Superuser-only."""
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True, max_length=150)
+    password = serializers.CharField(required=True, write_only=True, validators=[validate_password])
+    password_confirm = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError("Passwords don't match")
+        if User.objects.filter(email=attrs['email']).exists():
+            raise serializers.ValidationError("Email already exists")
+        if User.objects.filter(username=attrs['username']).exists():
+            raise serializers.ValidationError("Username already exists")
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        password = validated_data.pop('password')
+        user = User.objects.create_user(role='ADMINISTRATOR', password=password, **validated_data)
+        user.is_staff = True   # can log in to Django /admin/
+        user.is_superuser = False  # admin role, not super admin
+        user.save(update_fields=['is_staff', 'is_superuser'])
+        return user
+
+    def to_representation(self, instance):
+        return UserSerializer(instance).data
+
+
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
@@ -188,4 +227,24 @@ class ResetPasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['new_password_confirm']:
             raise serializers.ValidationError({'new_password_confirm': 'Passwords do not match.'})
         return attrs
+
+
+# --------------- Admin: list students/mentors (no administrator users) ---------------
+
+class AdminStudentListItemSerializer(serializers.ModelSerializer):
+    """For admin panel: student user + profile. Only used for role=STUDENT."""
+    student_profile = StudentProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'is_active', 'created_at', 'student_profile')
+
+
+class AdminMentorListItemSerializer(serializers.ModelSerializer):
+    """For admin panel: mentor user + profile. Only used for role=MENTOR."""
+    mentor_profile = MentorProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'username', 'is_active', 'created_at', 'mentor_profile')
 

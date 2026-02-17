@@ -20,6 +20,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Application definition
 INSTALLED_APPS = [
+    'jazzmin',  # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,8 +31,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'drf_yasg',
+    'drf_spectacular',
     'accounts',
+    'assessments',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +120,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
@@ -177,4 +180,87 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@virtualintern
 # OTP expiry for password reset (minutes)
 PASSWORD_RESET_OTP_EXPIRE_MINUTES = config('PASSWORD_RESET_OTP_EXPIRE_MINUTES', default=2, cast=int)
 
+# --------------- Django Jazzmin (Admin theme) ---------------
+JAZZMIN_SETTINGS = {
+    "site_title": "Virtual Internship Hub",
+    "site_header": "Virtual Internship Hub",
+    "site_brand": "VIH Admin",
+    "site_logo": None,
+    "login_logo": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": None,
+    "welcome_sign": "Welcome to Virtual Internship Hub Admin",
+    "copyright": "Virtual Internship Hub",
+    "search_model": ["accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "assessments.SkillAssessment"],
+    "user_avatar": None,
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+    ],
+    "usermenu_links": [
+        {"name": "Site", "url": "/", "new_window": True},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["accounts", "accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "accounts.Domain", "assessments", "assessments.SkillAssessment", "assessments.AssessmentQuestion"],
+    "custom_links": {},
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "accounts.User": "fas fa-user",
+        "accounts.StudentProfile": "fas fa-user-graduate",
+        "accounts.MentorProfile": "fas fa-chalkboard-teacher",
+        "accounts.Domain": "fas fa-globe",
+        "accounts.PasswordResetOTP": "fas fa-key",
+        "assessments": "fas fa-clipboard-list",
+        "assessments.SkillAssessment": "fas fa-file-alt",
+        "assessments.AssessmentQuestion": "fas fa-question-circle",
+        "assessments.StudentAssessmentAttempt": "fas fa-user-check",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "custom_css": None,
+    "custom_js": None,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {
+        "auth.user": "collapsible",
+        "auth.group": "collapsible",
+    },
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-info",
+    "accent": "accent-info",
+    "navbar": "navbar-dark navbar-info",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-info",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": True,
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+    "actions_sticky_top": True,
+}
 

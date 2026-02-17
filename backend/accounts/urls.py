@@ -1,3 +1,7 @@
+"""
+All API URLs in one file. Mounted at /api/ in config.
+Sections: auth, students, mentors, admin, domains.
+"""
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -11,28 +15,36 @@ from .views import (
     ResendPasswordResetOTPView,
     UserProfileView,
     StudentProfileView,
-    MentorProfileView,
     StudentListView,
+    MentorProfileView,
     MentorListView,
+    CreateAdministratorView,
+    AdminStudentListView,
+    AdminMentorListView,
     DomainListView,
 )
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    # Forgot password
-    path('forgot-password/send-otp/', SendPasswordResetOTPView.as_view(), name='send-password-reset-otp'),
-    path('forgot-password/verify-otp/', VerifyPasswordResetOTPView.as_view(), name='verify-password-reset-otp'),
-    path('forgot-password/reset/', ResetPasswordView.as_view(), name='reset-password'),
-    path('forgot-password/resend-otp/', ResendPasswordResetOTPView.as_view(), name='resend-password-reset-otp'),
-    # Profile
-    path('profile/', UserProfileView.as_view(), name='profile'),
-    path('student-profile/', StudentProfileView.as_view(), name='student-profile'),
-    path('mentor-profile/', MentorProfileView.as_view(), name='mentor-profile'),
-    # Lists
+    # --------------- Auth ---------------
+    path('auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('auth/login/', LoginView.as_view(), name='auth-login'),
+    path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='auth-token-refresh'),
+    path('auth/forgot-password/send-otp/', SendPasswordResetOTPView.as_view(), name='auth-forgot-send-otp'),
+    path('auth/forgot-password/verify-otp/', VerifyPasswordResetOTPView.as_view(), name='auth-forgot-verify-otp'),
+    path('auth/forgot-password/reset/', ResetPasswordView.as_view(), name='auth-forgot-reset'),
+    path('auth/forgot-password/resend-otp/', ResendPasswordResetOTPView.as_view(), name='auth-forgot-resend-otp'),
+    path('auth/profile/', UserProfileView.as_view(), name='auth-profile'),
+    # --------------- Student ---------------
+    path('students/profile/', StudentProfileView.as_view(), name='student-profile'),
     path('students/', StudentListView.as_view(), name='student-list'),
+    # --------------- Mentor ---------------
+    path('mentors/profile/', MentorProfileView.as_view(), name='mentor-profile'),
     path('mentors/', MentorListView.as_view(), name='mentor-list'),
+    # --------------- Admin ---------------
+    path('admin/administrators/', CreateAdministratorView.as_view(), name='admin-create-administrator'),
+    path('admin/users/students/', AdminStudentListView.as_view(), name='admin-users-students'),
+    path('admin/users/mentors/', AdminMentorListView.as_view(), name='admin-users-mentors'),
+    # --------------- Domains ---------------
     path('domains/', DomainListView.as_view(), name='domain-list'),
 ]

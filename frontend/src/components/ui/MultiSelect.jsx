@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 
 /**
- * Multi-select dropdown for domains. Options are { id, name }.
- * value: array of selected ids. onChange(ids).
+ * Multi-select dropdown. Options are { id, name }. value: array of selected ids. onChange(ids).
  */
 export function MultiSelect({ options = [], value = [], onChange, placeholder = 'Select...', disabled }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const safeOptions = Array.isArray(options) ? options : [];
+  const safeValue = Array.isArray(value) ? value : [];
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -17,19 +18,16 @@ export function MultiSelect({ options = [], value = [], onChange, placeholder = 
   }, []);
 
   const toggle = (id) => {
-    if (value.includes(id)) {
-      onChange(value.filter((v) => v !== id));
-    } else {
-      onChange([...value, id]);
-    }
+    if (safeValue.includes(id)) onChange(safeValue.filter((v) => v !== id));
+    else onChange([...safeValue, id]);
   };
 
   const remove = (e, id) => {
     e.stopPropagation();
-    onChange(value.filter((v) => v !== id));
+    onChange(safeValue.filter((v) => v !== id));
   };
 
-  const selected = options.filter((o) => value.includes(o.id));
+  const selected = safeOptions.filter((o) => safeValue.includes(o.id));
 
   return (
     <div className="relative" ref={ref}>
@@ -49,26 +47,20 @@ export function MultiSelect({ options = [], value = [], onChange, placeholder = 
                 className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md text-sm"
               >
                 {item.name}
-                <button type="button" onClick={(e) => remove(e, item.id)} className="hover:text-blue-900" aria-label="Remove">
-                  ×
-                </button>
+                <button type="button" onClick={(e) => remove(e, item.id)} className="hover:text-blue-900" aria-label="Remove">×</button>
               </span>
             ))
           )}
         </div>
         <span className="ml-2 text-gray-400">▼</span>
       </button>
-
       {open && (
         <div className="absolute z-10 w-full mt-1 py-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-auto">
-          {options.map((opt) => (
-            <label
-              key={opt.id}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer"
-            >
+          {safeOptions.map((opt) => (
+            <label key={opt.id} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer">
               <input
                 type="checkbox"
-                checked={value.includes(opt.id)}
+                checked={safeValue.includes(opt.id)}
                 onChange={() => toggle(opt.id)}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />

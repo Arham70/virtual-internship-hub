@@ -1,9 +1,7 @@
 import React from 'react';
-import FormInput from './FormInput';
+import { FormInput, MultiSelect, MailIcon, LockIcon, UserIcon, Loader2Icon } from '../ui';
 import RoleSwitcher from './RoleSwitcher';
-import { MultiSelect } from './MultiSelect';
-import { MailIcon, LockIcon, UserIcon, Loader2Icon } from './Icons';
-import { ROLE, SKILL_LEVEL_OPTIONS } from './constants';
+import { ROLE } from '../../utilities/constants';
 
 /**
  * Signup form: role switcher (Student/Mentor) then either student fields or mentor fields.
@@ -11,6 +9,7 @@ import { ROLE, SKILL_LEVEL_OPTIONS } from './constants';
 function SignupForm({
   role,
   onRoleChange,
+  roleLocked,
   // Student fields
   firstName,
   lastName,
@@ -19,9 +18,9 @@ function SignupForm({
   studentPassword,
   studentConfirmPassword,
   targetDomainIds,
-  skillLevel,
   domains,
   domainsLoading,
+  domainsError,
   onFirstNameChange,
   onLastNameChange,
   onStudentEmailChange,
@@ -29,7 +28,6 @@ function SignupForm({
   onStudentPasswordChange,
   onStudentConfirmPasswordChange,
   onTargetDomainIdsChange,
-  onSkillLevelChange,
   // Mentor fields
   mentorEmail,
   mentorUsername,
@@ -46,13 +44,15 @@ function SignupForm({
   loading,
   onSubmit,
   onSwitchToLogin,
+  accentClass = 'text-blue-600 hover:text-blue-700',
+  buttonClass = 'bg-blue-600 hover:bg-blue-700',
 }) {
   const selectClass =
     'w-full px-3 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none disabled:opacity-50';
 
   return (
     <>
-      <RoleSwitcher role={role} onRoleChange={onRoleChange} />
+      {!roleLocked && <RoleSwitcher role={role} onRoleChange={onRoleChange} />}
 
       <form onSubmit={onSubmit} className="space-y-5 mt-6">
         {/* Student fields */}
@@ -110,6 +110,7 @@ function SignupForm({
               disabled={loading}
               minLength={8}
               icon={LockIcon}
+              showPasswordToggle
             />
             <FormInput
               id="student-confirm-password"
@@ -121,6 +122,7 @@ function SignupForm({
               required
               disabled={loading}
               icon={LockIcon}
+              showPasswordToggle
             />
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Target Domains</label>
@@ -128,27 +130,17 @@ function SignupForm({
                 options={domains}
                 value={targetDomainIds}
                 onChange={onTargetDomainIdsChange}
-                placeholder="Select areas of interest"
+                placeholder={domainsLoading ? 'Loading domains…' : 'Select areas of interest'}
                 disabled={loading || domainsLoading}
               />
-            </div>
-            <div>
-              <label htmlFor="skill-level" className="block text-gray-700 text-sm font-medium mb-1">
-                Skill Level (optional)
-              </label>
-              <select
-                id="skill-level"
-                value={skillLevel}
-                onChange={(e) => onSkillLevelChange(e.target.value)}
-                className={selectClass}
-                disabled={loading}
-              >
-                {SKILL_LEVEL_OPTIONS.map((opt) => (
-                  <option key={opt.value || 'empty'} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              {domainsError && (
+                <p className="mt-1 text-red-600 text-xs">
+                  {domainsError?.response?.data?.detail || domainsError?.message || (typeof domainsError === 'string' ? domainsError : 'Failed to load domains. Check your connection and try again.')}
+                </p>
+              )}
+              {!domainsLoading && !domainsError && domains.length === 0 && (
+                <p className="mt-1 text-amber-600 text-xs">No domains loaded. Run: python manage.py populate_domains (in backend).</p>
+              )}
             </div>
           </>
         )}
@@ -188,6 +180,7 @@ function SignupForm({
               disabled={loading}
               minLength={8}
               icon={LockIcon}
+              showPasswordToggle
             />
             <FormInput
               id="mentor-confirm-password"
@@ -197,6 +190,7 @@ function SignupForm({
               value={mentorConfirmPassword}
               onChange={(e) => onMentorConfirmPasswordChange(e.target.value)}
               required
+              showPasswordToggle
               disabled={loading}
               icon={LockIcon}
             />
@@ -239,7 +233,7 @@ function SignupForm({
 
         <button
           type="submit"
-          className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2"
+          className={`w-full py-3 rounded-lg ${buttonClass} text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2`}
           disabled={loading || (role === ROLE.STUDENT && domainsLoading)}
         >
           {loading ? (
@@ -255,7 +249,7 @@ function SignupForm({
 
       <p className="text-center text-gray-600 text-sm mt-6">
         Already have an account?{' '}
-        <button type="button" className="text-blue-600 hover:text-blue-700 font-medium" onClick={onSwitchToLogin}>
+        <button type="button" className={`font-medium ${accentClass}`} onClick={onSwitchToLogin}>
           Log in
         </button>
       </p>

@@ -1,8 +1,6 @@
 import React from 'react';
-import FormInput from './FormInput';
-import { MailIcon, LockIcon, Loader2Icon, ArrowLeftIcon } from './Icons';
-import { OTPInput } from './OTPInput';
-import { FORGOT_STEP } from './constants';
+import { FormInput, OTPInput, MailIcon, LockIcon, Loader2Icon, ArrowLeftIcon } from '../ui';
+import { FORGOT_STEP } from '../../utilities/constants';
 
 /**
  * Forgot password: 3 steps.
@@ -114,6 +112,7 @@ function ForgotPasswordForm({
         disabled={loading}
         minLength={8}
         icon={LockIcon}
+        showPasswordToggle
       />
       <FormInput
         id="confirm-password"
@@ -125,6 +124,7 @@ function ForgotPasswordForm({
         required
         disabled={loading}
         icon={LockIcon}
+        showPasswordToggle
       />
       <button
         type="submit"

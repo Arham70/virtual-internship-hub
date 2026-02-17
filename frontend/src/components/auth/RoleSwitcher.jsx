@@ -1,6 +1,6 @@
 import React from 'react';
-import { GraduationCapIcon, BriefcaseIcon } from './Icons';
-import { ROLE } from './constants';
+import { GraduationCapIcon, BriefcaseIcon } from '../ui';
+import { ROLE } from '../../utilities/constants';
 
 /**
  * Two buttons: Student or Mentor. Used on signup form.

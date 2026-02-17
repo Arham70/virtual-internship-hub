@@ -6,6 +6,8 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthPage, ProtectedRoute } from './components/auth';
+import HomePage from './components/home/HomePage';
+import { ROLE, VIEW } from './utilities/constants';
 
 const StudentDashboard = lazy(() => import('./components/dashboard/StudentDashboard'));
 const MentorDashboard = lazy(() => import('./components/dashboard/MentorDashboard'));
@@ -26,14 +28,14 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageFallback />}>
       <Routes>
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage />}
-        />
-        <Route
-          path="/register"
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage />}
-        />
+        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <HomePage />} />
+        <Route path="/student/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage role={ROLE.STUDENT} initialView={VIEW.LOGIN} />} />
+        <Route path="/student/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage role={ROLE.STUDENT} initialView={VIEW.SIGNUP} />} />
+        <Route path="/mentor/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage role={ROLE.MENTOR} initialView={VIEW.LOGIN} />} />
+        <Route path="/mentor/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage role={ROLE.MENTOR} initialView={VIEW.SIGNUP} />} />
+        <Route path="/admin/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage role={ROLE.ADMINISTRATOR} initialView={VIEW.LOGIN} />} />
+        <Route path="/login" element={<Navigate to="/student/login" replace />} />
+        <Route path="/register" element={<Navigate to="/student/signup" replace />} />
         <Route
           path="/student/dashboard"
           element={
@@ -69,7 +71,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/home" element={<Navigate to="/" replace />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
       </Routes>
     </Suspense>

@@ -161,4 +161,3 @@ class PasswordResetOTP(models.Model):
     @property
     def is_expired(self):
         return timezone.now() >= self.expires_at
-
