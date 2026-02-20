@@ -34,4 +34,4 @@ class StudentAssessmentAttemptAdmin(admin.ModelAdmin):
     list_filter = ('assessment', 'submitted_at')
     search_fields = ('user__username', 'user__email')
     readonly_fields = ('submitted_at', 'score', 'total_points', 'answers')
-    filter_horizontal = ('recommended_domains',)
+    filter_horizontal = ('test_domains', 'recommended_domains')

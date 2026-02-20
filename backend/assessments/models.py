@@ -55,7 +55,7 @@ class AssessmentQuestion(models.Model):
 
 
 class StudentAssessmentAttempt(models.Model):
-    """One student's submission of an assessment: score and recommended domains (FR2)."""
+    """One student's submission: score, test_domains (which domains tested), recommended_domains (FR2)."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -69,6 +69,12 @@ class StudentAssessmentAttempt(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.PositiveIntegerField(default=0)
     total_points = models.PositiveIntegerField(default=0)
+    test_domains = models.ManyToManyField(
+        'accounts.Domain',
+        related_name='+',
+        blank=True,
+        help_text='Domains this test was taken for (e.g. user\'s target domains).',
+    )
     recommended_domains = models.ManyToManyField(
         'accounts.Domain',
         related_name='+',
