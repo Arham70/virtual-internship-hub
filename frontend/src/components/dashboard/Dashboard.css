@@ -239,6 +239,82 @@
   margin-left: 5rem;
 }
 
+/* --------------- Student dashboard (professional UI) --------------- */
+.student-dashboard {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.student-dashboard .dashboard-nav {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 0 1.5rem;
+}
+
+.student-dashboard .dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.student-dashboard .dashboard-section {
+  margin-bottom: 2rem;
+}
+
+.student-dashboard .welcome-card {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #2563eb 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 40px rgba(30, 64, 175, 0.25);
+  border: none;
+}
+
+.student-dashboard .welcome-card h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.student-dashboard .welcome-card p {
+  margin: 0;
+  opacity: 0.95;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.student-dashboard .welcome-card .domain-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.student-dashboard .welcome-card .domain-tags span {
+  padding: 0.35rem 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.student-dashboard .assessment-error-card {
+  margin-bottom: 1rem;
+  border-left: 4px solid #dc2626;
+  background: #fef2f2;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.student-dashboard .assessment-error-card p {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.875rem;
+}
+
 /* Student nav (no sidebar, top nav with links) */
 .student-dashboard-nav {
   display: flex;
@@ -262,20 +338,59 @@
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: transparent;
-  color: #4b5563;
+  color: #475569;
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 
 .student-dashboard-nav .nav-links button:hover {
-  background: #f3f4f6;
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 .student-dashboard-nav .nav-links button.active {
   background: #eff6ff;
   color: #1d4ed8;
+}
+
+.student-dashboard-nav .nav-user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.student-dashboard-nav .nav-user-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.student-dashboard-nav .nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 1rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+.student-dashboard-nav .nav-actions button,
+.student-dashboard-nav .nav-icon-btn {
+  padding: 0.5rem;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.student-dashboard-nav .nav-actions button:hover,
+.student-dashboard-nav .nav-icon-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
 }
 
 /* Section blocks */
@@ -337,43 +452,117 @@
 
 /* Assessment block (student) */
 .assessment-cta-block {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-  border: 2px solid #fdba74;
-  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   padding: 2rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.assessment-cta-block .assessment-cta-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.assessment-cta-block .assessment-cta-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.assessment-cta-block .assessment-cta-icon.select {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.assessment-cta-block .assessment-cta-icon.alert {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.assessment-cta-block h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
 }
 
 .assessment-cta-block .assessment-card-inner {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 1.25rem;
   margin: 1rem 0;
+  border: 1px solid #e2e8f0;
 }
 
 .assessment-cta-block .btn-start-assessment {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 0.5rem;
+  transition: box-shadow 0.2s, transform 0.05s;
 }
 
 .assessment-cta-block .btn-start-assessment:hover {
-  opacity: 0.95;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.assessment-cta-block .attempts-meta {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 0.75rem;
 }
 
 .assessment-passed-block {
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-  border: 2px solid #6ee7b7;
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 16px;
+  padding: 1.75rem;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.assessment-passed-block .passed-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.assessment-passed-block .passed-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #dcfce7;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.assessment-passed-block h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+}
+
+.assessment-passed-block p {
+  font-size: 0.9375rem;
+  color: #334155;
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* Tasks locked */
@@ -446,22 +635,146 @@
 }
 
 .progress-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.progress-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .progress-card .progress-icon {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.progress-card .progress-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.progress-card .progress-label {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.student-dashboard .progress-cards-grid {
+  gap: 1.25rem;
+}
+
+.student-dashboard .quick-links-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.student-dashboard .quick-links-card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+}
+
+.student-dashboard .quick-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.student-dashboard .quick-link-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.student-dashboard .quick-link-btn .quick-link-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-dashboard .quick-link-btn .quick-link-title {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.student-dashboard .quick-link-btn .quick-link-desc {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+.student-dashboard .btn-task-start {
+  padding: 0.4rem 0.875rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.student-dashboard .btn-task-start:hover {
+  background: #1d4ed8;
+}
+
+.student-dashboard .btn-outline-primary {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  background: transparent;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.student-dashboard .btn-outline-primary:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.student-dashboard .tasks-section-card {
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border-color: #e2e8f0;
+}
+
+.student-dashboard .tasks-locked-block {
+  border-radius: 16px;
+  padding: 2.5rem;
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* Chatbot */

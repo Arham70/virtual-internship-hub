@@ -21,4 +21,43 @@ code {
     monospace;
 }
 
+/* Professional auth card (student / mentor / admin) */
+.auth-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+.auth-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+}
+.auth-card .text-center h2 {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+.auth-card input:not([type="checkbox"]) {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-card input:not([type="checkbox"]):focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+.auth-card button[type="submit"] {
+  border-radius: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+.auth-card button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.auth-card button[type="submit"]:active:not(:disabled) {
+  transform: translateY(0);
+}
+.auth-card a {
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
 

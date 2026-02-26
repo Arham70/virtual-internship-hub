@@ -19,15 +19,15 @@ export function getAuthVariantFromRole(role) {
 /** Tailwind classes and copy per variant */
 export const authTheme = {
   student: {
-    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50',
+    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/80 to-indigo-50/90',
     panelBg: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
-    cardShadow: 'shadow-2xl shadow-blue-500/10',
+    cardShadow: 'shadow-xl shadow-blue-500/5',
     logoGradient: 'from-blue-600 to-indigo-600',
     accent: 'blue',
     portalName: 'Student Portal',
     tagline: 'Learn • Build • Succeed',
     accentClass: 'text-blue-600 hover:text-blue-700',
-    buttonClass: 'bg-blue-600 hover:bg-blue-700',
+    buttonClass: 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     stats: [
       { value: '10K+', label: 'Active Students' },
       { value: '1000+', label: 'Projects' },

@@ -373,10 +373,11 @@ function StudentDashboard() {
   const [assessmentError, setAssessmentError] = useState(null);
   const [result, setResult] = useState(null);
 
-  useEffect(() => {
+  const loadAttempts = () => {
     studentApi.getAttempts()
       .then((res) => {
-        const list = res.data || [];
+        const data = res.data || {};
+        const list = Array.isArray(data) ? data : (data.results || []);
         setAttemptCount(list.length);
         const today = new Date().toISOString().slice(0, 10);
         const todayCount = list.filter((a) => {
@@ -390,11 +391,15 @@ function StudentDashboard() {
         if (list.length > 0) setLastAttempt(list[0]);
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadAttempts();
   }, []);
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const studentName = user?.student_profile?.first_name && user?.student_profile?.last_name
@@ -467,6 +472,8 @@ function StudentDashboard() {
     setSelectedAnswers([]);
     setCurrentQuestionIndex(0);
     setAssessmentError(null);
+    loadAttempts();
+    if (typeof refreshUser === 'function') refreshUser();
   };
 
   const renderContent = () => {
@@ -595,17 +602,17 @@ function StudentDashboard() {
   };
 
   return (
-    <div className="dashboard-container" style={{ background: '#f9fafb', minHeight: '100vh' }}>
+    <div className="dashboard-container student-dashboard">
       {/* Top Navbar */}
-      <nav className="dashboard-nav" style={{ background: 'white', borderBottom: '1px solid #e5e7eb', boxShadow: 'none' }}>
-        <div className="student-dashboard-nav" style={{ width: '100%', maxWidth: 1600, margin: '0 auto' }}>
+      <nav className="dashboard-nav">
+        <div className="student-dashboard-nav">
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 8, background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+              <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}>
                 <GraduationCapIcon className="w-6 h-6" />
               </div>
               <div className="hidden sm:block">
-                <div className="text-lg font-medium text-gray-900">Virtual Internship Hub</div>
+                <div className="text-lg font-semibold text-gray-900">Virtual Internship Hub</div>
                 <div className="text-xs text-gray-500">Student Portal</div>
               </div>
             </div>
@@ -627,15 +634,15 @@ function StudentDashboard() {
               })}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button type="button" className="p-2 hover:bg-gray-100 rounded-lg relative" onClick={() => setShowNotifications(!showNotifications)} aria-label="Notifications">
-              <BellIcon className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button type="button" className="nav-icon-btn relative" onClick={() => setShowNotifications(!showNotifications)} aria-label="Notifications">
+              <BellIcon className="w-5 h-5" />
+              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">0</span>
             </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1rem', borderLeft: '1px solid #e5e7eb' }}>
+            <div className="nav-actions" style={{ gap: '0.75rem' }}>
               <div className="hidden sm:block text-right">
-                <div className="text-sm text-gray-900">{studentName}</div>
-                <div className="text-xs text-gray-500">
+                <div className="nav-user-name">{studentName}</div>
+                <div className="nav-user-meta">
                   {lastAttempt?.recommended_domains?.[0] ? (
                     <>Recommended: <strong>{lastAttempt.recommended_domains[0].name}</strong></>
                   ) : (
@@ -643,11 +650,11 @@ function StudentDashboard() {
                   )}
                 </div>
               </div>
-              <button type="button" onClick={() => setActiveView('profile')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" title="Profile">
-                <UserIcon className="w-4 h-4" />
+              <button type="button" onClick={() => setActiveView('profile')} className="nav-icon-btn" title="Profile">
+                <UserIcon className="w-5 h-5" />
               </button>
-              <button type="button" onClick={handleLogout} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg" title="Logout">
-                <LogOutIcon className="w-4 h-4" />
+              <button type="button" onClick={handleLogout} className="nav-icon-btn" title="Logout">
+                <LogOutIcon className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -657,7 +664,6 @@ function StudentDashboard() {
       {/* Main content */}
       <div
         className={`dashboard-content ${['intro', 'test', 'result'].includes(assessmentView) ? 'assessment-active' : ''}`}
-        style={{ maxWidth: 1600, margin: '0 auto', padding: '1.5rem 2rem' }}
       >
         {renderContent()}
       </div>
@@ -681,25 +687,23 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
   return (
     <div className="dashboard-section">
       {/* Welcome card */}
-      <div className="welcome-card" style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.5rem', marginBottom: '0.5rem' }}>Welcome back, {studentName}!</h2>
-        <p style={{ margin: 0, opacity: 0.9 }}>
+      <div className="welcome-card">
+        <h2>Welcome back, {studentName}!</h2>
+        <p>
           {assessmentPassed ? 'Great job on passing your assessment. Check out your recommended tasks below.' : 'Complete your skill assessment to unlock personalized tasks and get a domain recommendation.'}
         </p>
         {targetDomains.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="domain-tags">
             {targetDomains.map((d, i) => (
-              <span key={i} style={{ padding: '0.25rem 0.75rem', background: 'rgba(255,255,255,0.2)', borderRadius: 8, fontSize: '0.875rem' }}>
-                {d}
-              </span>
+              <span key={i}>{d}</span>
             ))}
           </div>
         )}
       </div>
 
       {assessmentError && (
-        <div className="info-card" style={{ marginBottom: '1rem', borderLeft: '4px solid #dc2626', background: '#fef2f2' }}>
-          <p style={{ margin: 0, color: '#991b1b' }}>{assessmentError}</p>
+        <div className="assessment-error-card">
+          <p>{assessmentError}</p>
         </div>
       )}
 
@@ -707,16 +711,16 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
       {!assessmentPassed ? (
         targetDomains.length < 2 ? (
           <div className="assessment-cta-block">
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
-              <div style={{ padding: '1rem', borderRadius: 12, background: '#eff6ff', color: '#2563eb' }}>
+            <div className="assessment-cta-inner">
+              <div className="assessment-cta-icon select">
                 <TargetIcon className="w-8 h-8" />
               </div>
               <div style={{ flex: 1 }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111827' }}>Select your domains of interest</h2>
-                <p style={{ color: '#374151', marginBottom: '1rem' }}>
+                <h2>Select your domains of interest</h2>
+                <p style={{ color: '#475569', marginBottom: '1rem', fontSize: '0.9375rem', lineHeight: 1.5 }}>
                   Choose 2 to 3 domains you want to focus on. Then you can take the skill assessment to get a recommended domain.
                 </p>
-                <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>
                   Go to your profile to select or update your target domains.
                 </p>
               </div>
@@ -724,36 +728,36 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
           </div>
         ) : (
         <div className="assessment-cta-block">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.5rem' }}>
-            <div style={{ padding: '1rem', borderRadius: 12, background: '#fed7aa', color: '#c2410c' }}>
+          <div className="assessment-cta-inner">
+            <div className="assessment-cta-icon alert">
               <AlertCircleIcon className="w-8 h-8" />
             </div>
             <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: '#111827' }}>Complete Your Skill Assessment</h2>
-              <p style={{ color: '#374151', marginBottom: '1rem' }}>
+              <h2>Complete Your Skill Assessment</h2>
+              <p style={{ color: '#475569', marginBottom: '1rem', fontSize: '0.9375rem', lineHeight: 1.5 }}>
                 {targetDomains[0] && targetDomains[0] !== 'Your domains'
                   ? `Take the skill assessment for your target domains to get an AI-based domain recommendation. Covers: ${targetDomains.join(', ')}.`
                   : 'Take the skill assessment across popular domains to get your highly recommended freelancing domain.'}
               </p>
               <div className="assessment-card-inner">
-                <button type="button" className="btn-start-assessment" onClick={onStartAssessment} style={{ width: '100%', padding: '0.75rem', background: 'linear-gradient(90deg, #2563eb, #1d4ed8)', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 500 }}>
+                <button type="button" className="btn-start-assessment" onClick={onStartAssessment}>
                   Start Assessment
                 </button>
               </div>
-              <p style={{ fontSize: '0.875rem', color: '#374151', marginTop: '0.75rem' }}>{attemptCount} of {maxAttemptsPerDay} attempt(s) {attemptCountLabel}</p>
+              <p className="attempts-meta">{attemptCount} of {maxAttemptsPerDay} attempt(s) {attemptCountLabel}</p>
             </div>
           </div>
         </div>
         )
       ) : (
         <div className="assessment-passed-block">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-            <div style={{ padding: '0.75rem', borderRadius: 12, background: '#a7f3d0', color: '#047857' }}>
-              <CheckCircleIcon className="w-8 h-8" />
+          <div className="passed-inner">
+            <div className="passed-icon">
+              <CheckCircleIcon className="w-6 h-6" />
             </div>
             <div style={{ flex: 1 }}>
-              <h3 style={{ marginBottom: '0.25rem', color: '#111827' }}>Assessment Passed!</h3>
-              <p style={{ color: '#374151', margin: 0 }}>
+              <h3>Assessment Passed!</h3>
+              <p>
                 {recommendedDomain ? (
                   <>Your <strong>highly recommended domain</strong>: <strong>{recommendedDomain.name}</strong>. We&apos;ve unlocked beginner-level tasks for you.</>
                 ) : (
@@ -770,8 +774,8 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
         <div className="tasks-section-card">
           <div className="tasks-section-header">
             <div>
-              <h2 style={{ marginBottom: '0.5rem', color: '#111827' }}>Recommended for You</h2>
-              <p style={{ color: '#6b7280', fontSize: '0.875rem', margin: 0 }}>Beginner level tasks based on your assessment and skills.</p>
+              <h2 style={{ marginBottom: '0.35rem', color: '#0f172a', fontSize: '1.25rem', fontWeight: 600 }}>Recommended for You</h2>
+              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>Beginner level tasks based on your assessment and skills.</p>
             </div>
             <span className="task-badge beginner">Beginner</span>
           </div>
@@ -781,12 +785,12 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                   <div>
                     <span className="task-badge beginner" style={{ marginRight: '0.5rem' }}>{task.difficulty}</span>
-                    <strong style={{ color: '#111827' }}>{task.title}</strong>
+                    <strong style={{ color: '#0f172a', fontWeight: 600 }}>{task.title}</strong>
                   </div>
-                  <button type="button" style={{ padding: '0.35rem 0.75rem', background: '#2563eb', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem' }}>Start Task</button>
+                  <button type="button" className="btn-task-start">Start Task</button>
                 </div>
-                <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0' }}>{task.project} • {task.domain}</p>
-                <p style={{ fontSize: '0.875rem', color: '#374151', margin: 0 }}>{task.description}</p>
+                <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0.25rem 0' }}>{task.project} • {task.domain}</p>
+                <p style={{ fontSize: '0.875rem', color: '#475569', margin: 0, lineHeight: 1.45 }}>{task.description}</p>
                 <span className="task-badge not-started" style={{ marginTop: '0.5rem', display: 'inline-block' }}>Not Started</span>
               </div>
             ))}
@@ -797,48 +801,48 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
           <div className="lock-icon-wrap">
             <LockIcon className="w-6 h-6" />
           </div>
-          <h3 style={{ marginBottom: '0.5rem', color: '#111827' }}>Tasks Locked</h3>
-          <p style={{ color: '#6b7280', marginBottom: '1rem', maxWidth: 400, marginLeft: 'auto', marginRight: 'auto' }}>
+          <h3 style={{ marginBottom: '0.5rem', color: '#0f172a', fontWeight: 600 }}>Tasks Locked</h3>
+          <p style={{ color: '#64748b', marginBottom: '1rem', maxWidth: 400, marginLeft: 'auto', marginRight: 'auto', fontSize: '0.9375rem' }}>
             Complete the skill assessment above to unlock personalized tasks based on your domains and performance.
           </p>
-          <button type="button" onClick={() => {}} style={{ padding: '0.5rem 1rem', border: '1px solid #2563eb', color: '#2563eb', background: 'transparent', borderRadius: 8, cursor: 'pointer' }}>Take Assessment Now</button>
+          <button type="button" onClick={() => {}} className="btn-outline-primary">Take Assessment Now</button>
         </div>
       )}
 
-      {/* Progress summary – tasksCompleted from state (replace with API when available) */}
+      {/* Progress summary */}
       <div className="progress-cards-grid">
         <div className="progress-card">
           <div className="progress-icon" style={{ background: '#eff6ff', color: '#2563eb' }}><TargetIcon className="w-6 h-6" /></div>
           <div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>{tasksCompleted}</div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Tasks Completed</div>
+            <div className="progress-value">{tasksCompleted}</div>
+            <div className="progress-label">Tasks Completed</div>
           </div>
         </div>
         <div className="progress-card">
           <div className="progress-icon" style={{ background: '#f5f3ff', color: '#7c3aed' }}><AwardIcon className="w-6 h-6" /></div>
           <div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>{assessmentPassed ? 'Intermediate' : 'Not assessed'}</div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Skill Level</div>
+            <div className="progress-value">{assessmentPassed ? 'Intermediate' : 'Not assessed'}</div>
+            <div className="progress-label">Skill Level</div>
           </div>
         </div>
         <div className="progress-card">
-          <div className="progress-icon" style={{ background: assessmentPassed ? '#ecfdf5' : '#f3f4f6', color: assessmentPassed ? '#059669' : '#9ca3af' }}><CheckCircleIcon className="w-6 h-6" /></div>
+          <div className="progress-icon" style={{ background: assessmentPassed ? '#ecfdf5' : '#f1f5f9', color: assessmentPassed ? '#059669' : '#9ca3af' }}><CheckCircleIcon className="w-6 h-6" /></div>
           <div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: '#111827' }}>{assessmentPassed ? 'Passed' : `${attemptCount}/2`}</div>
-            <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Skill Assessment</div>
+            <div className="progress-value">{assessmentPassed ? 'Passed' : `${attemptCount}/2`}</div>
+            <div className="progress-label">Skill Assessment</div>
           </div>
         </div>
       </div>
 
       {/* Quick links */}
-      <div className="info-card" style={{ marginTop: '1rem' }}>
-        <h3 style={{ marginBottom: '1rem', color: '#111827' }}>Quick Links</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-          <button type="button" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: 8, background: 'white', cursor: 'pointer', textAlign: 'left' }} className="hover:bg-gray-50">
-            <div style={{ padding: '0.5rem', background: '#eff6ff', borderRadius: 8, color: '#2563eb' }}><FolderOpenIcon className="w-5 h-5" /></div>
+      <div className="quick-links-card">
+        <h3>Quick Links</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+          <button type="button" className="quick-link-btn">
+            <div className="quick-link-icon"><FolderOpenIcon className="w-5 h-5" /></div>
             <div>
-              <div className="font-medium text-gray-900">View Portfolio</div>
-              <div className="text-xs text-gray-600">Showcase your work</div>
+              <div className="quick-link-title">View Portfolio</div>
+              <div className="quick-link-desc">Showcase your work</div>
             </div>
           </button>
         </div>
