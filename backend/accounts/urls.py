@@ -22,6 +22,8 @@ from .views import (
     AdminStudentListView,
     AdminMentorListView,
     DomainListView,
+    AdminDomainListCreateView,
+    AdminDomainDetailView,
 )
 
 urlpatterns = [
@@ -45,6 +47,8 @@ urlpatterns = [
     path('admin/administrators/', CreateAdministratorView.as_view(), name='admin-create-administrator'),
     path('admin/users/students/', AdminStudentListView.as_view(), name='admin-users-students'),
     path('admin/users/mentors/', AdminMentorListView.as_view(), name='admin-users-mentors'),
+    path('admin/domains/', AdminDomainListCreateView.as_view(), name='admin-domain-list-create'),
+    path('admin/domains/<int:pk>/', AdminDomainDetailView.as_view(), name='admin-domain-detail'),
     # --------------- Domains ---------------
     path('domains/', DomainListView.as_view(), name='domain-list'),
 ]

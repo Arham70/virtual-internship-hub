@@ -6,9 +6,8 @@ export const authApi = {
   logout: (data) => client.post('/auth/logout/', data),
   getProfile: () => client.get('/auth/profile/'),
   updateProfile: (data) => client.put('/auth/profile/', data),
-  sendPasswordResetOtp: (email) => client.post('/auth/forgot-password/send-otp/', { email }),
-  verifyPasswordResetOtp: (email, otp) =>
-    client.post('/auth/forgot-password/verify-otp/', { email, otp }),
+  sendPasswordResetOtp: (payload) => client.post('/auth/forgot-password/send-otp/', payload),
+  verifyPasswordResetOtp: (payload) => client.post('/auth/forgot-password/verify-otp/', payload),
   resetPassword: (payload) => client.post('/auth/forgot-password/reset/', payload),
-  resendPasswordResetOtp: (email) => client.post('/auth/forgot-password/resend-otp/', { email }),
+  resendPasswordResetOtp: (payload) => client.post('/auth/forgot-password/resend-otp/', payload),
 };

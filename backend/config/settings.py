@@ -75,7 +75,7 @@ DATABASES = {
         'USER': config('DB_USER', default='postgres'),
         'PASSWORD': config('DB_PASSWORD', default='1234'),
         'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5433'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 
@@ -175,7 +175,7 @@ EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@virtualinternship.com')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='davinciuser702@gmail.com')
 
 # OTP expiry for password reset (minutes)
 PASSWORD_RESET_OTP_EXPIRE_MINUTES = config('PASSWORD_RESET_OTP_EXPIRE_MINUTES', default=2, cast=int)
@@ -191,7 +191,7 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "welcome_sign": "Welcome to Virtual Internship Hub Admin",
     "copyright": "Virtual Internship Hub",
-    "search_model": ["accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "assessments.SkillAssessment"],
+    "search_model": ["accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "assessments.AssessmentQuestion"],
     "user_avatar": None,
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
@@ -203,7 +203,7 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
-    "order_with_respect_to": ["accounts", "accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "accounts.Domain", "assessments", "assessments.SkillAssessment", "assessments.AssessmentQuestion"],
+    "order_with_respect_to": ["accounts", "accounts.User", "accounts.StudentProfile", "accounts.MentorProfile", "accounts.Domain", "assessments", "assessments.AssessmentQuestion", "assessments.StudentAssessmentAttempt"],
     "custom_links": {},
     "icons": {
         "auth": "fas fa-users-cog",
@@ -214,7 +214,6 @@ JAZZMIN_SETTINGS = {
         "accounts.Domain": "fas fa-globe",
         "accounts.PasswordResetOTP": "fas fa-key",
         "assessments": "fas fa-clipboard-list",
-        "assessments.SkillAssessment": "fas fa-file-alt",
         "assessments.AssessmentQuestion": "fas fa-question-circle",
         "assessments.StudentAssessmentAttempt": "fas fa-user-check",
     },

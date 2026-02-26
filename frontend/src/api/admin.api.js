@@ -3,16 +3,22 @@ import { client } from './client';
 export const adminApi = {
   createAdministrator: (data) => client.post('/admin/administrators/', data),
 
-  // Users (students and mentors only; admin role users are not returned)
-  getStudents: () => client.get('/admin/users/students/'),
-  getMentors: () => client.get('/admin/users/mentors/'),
+  // Users (students and mentors only; paginated)
+  getStudents: (params) => client.get('/admin/users/students/', { params: params || {} }),
+  getMentors: (params) => client.get('/admin/users/mentors/', { params: params || {} }),
 
-  // Skill assessments
-  getAssessments: () => client.get('/admin/assessments/'),
-  createAssessment: (data) => client.post('/admin/assessments/', data),
-  getAssessment: (id) => client.get(`/admin/assessments/${id}/`),
-  updateAssessment: (id, data) => client.patch(`/admin/assessments/${id}/`, data),
-  deleteAssessment: (id) => client.delete(`/admin/assessments/${id}/`),
-  getAssessmentQuestions: (assessmentId) => client.get(`/admin/assessments/${assessmentId}/questions/`),
-  createQuestion: (assessmentId, data) => client.post(`/admin/assessments/${assessmentId}/questions/`, data),
+  // Domains CRUD (admin only; paginated)
+  getDomainsAdmin: (params) => client.get('/admin/domains/', { params: params || {} }),
+  createDomain: (data) => client.post('/admin/domains/', data),
+  updateDomain: (id, data) => client.patch(`/admin/domains/${id}/`, data),
+  deleteDomain: (id) => client.delete(`/admin/domains/${id}/`),
+
+  // Domain questions (MCQs per domain; 5 per page)
+  getDomainQuestionCounts: () => client.get('/admin/domains/question-counts/'),
+  getDomainQuestions: (domainId, params) => client.get(`/admin/domains/${domainId}/questions/`, { params: params || {} }),
+  createQuestion: (domainId, data) => client.post(`/admin/domains/${domainId}/questions/`, data),
+  updateQuestion: (domainId, questionId, data) =>
+    client.patch(`/admin/domains/${domainId}/questions/${questionId}/`, data),
+  deleteQuestion: (domainId, questionId) =>
+    client.delete(`/admin/domains/${domainId}/questions/${questionId}/`),
 };

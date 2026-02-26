@@ -1,41 +1,24 @@
 """
 Skill assessment models (FR2). Domain and User live in accounts.
+Questions are per-domain; no separate SkillAssessment container.
 """
 from django.conf import settings
 from django.db import models
 
 
-class SkillAssessment(models.Model):
-    """Assessment test (e.g. per domain). Admin creates; students take."""
-    title = models.CharField(max_length=200)
+class AssessmentQuestion(models.Model):
+    """MCQ question for a domain (admin adds; used in composed student assessment)."""
+    CORRECT_CHOICES = [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
+    COMPLEXITY_CHOICES = [
+        ('EASY', 'Easy'),
+        ('MEDIUM', 'Medium'),
+        ('HARD', 'Hard'),
+    ]
+
     domain = models.ForeignKey(
         'accounts.Domain',
         on_delete=models.CASCADE,
-        related_name='skill_assessments',
-        null=True,
-        blank=True,
-    )
-    max_attempts = models.PositiveIntegerField(default=2)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'skill_assessments'
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.title
-
-
-class AssessmentQuestion(models.Model):
-    """MCQ question for a skill assessment."""
-    CORRECT_CHOICES = [('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')]
-
-    assessment = models.ForeignKey(
-        SkillAssessment,
-        on_delete=models.CASCADE,
-        related_name='questions',
+        related_name='assessment_questions',
     )
     text = models.TextField()
     option_a = models.CharField(max_length=500)
@@ -43,28 +26,28 @@ class AssessmentQuestion(models.Model):
     option_c = models.CharField(max_length=500)
     option_d = models.CharField(max_length=500)
     correct_option = models.CharField(max_length=1, choices=CORRECT_CHOICES)
+    complexity = models.CharField(
+        max_length=10,
+        choices=COMPLEXITY_CHOICES,
+        default='MEDIUM',
+    )
     order = models.PositiveIntegerField(default=0)
     points = models.PositiveIntegerField(default=1)
 
     class Meta:
         db_table = 'assessment_questions'
-        ordering = ['assessment', 'order', 'id']
+        ordering = ['domain', 'order', 'id']
 
     def __str__(self):
-        return f"{self.assessment.title} – Q{self.order}"
+        return f"Q{self.order} – {self.text[:50]}…"
 
 
 class StudentAssessmentAttempt(models.Model):
-    """One student's submission: score, test_domains (which domains tested), recommended_domains (FR2)."""
+    """One student's submission: score, test_domains, recommended_domains (FR2). Composed only."""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='assessment_attempts',
-    )
-    assessment = models.ForeignKey(
-        SkillAssessment,
-        on_delete=models.CASCADE,
-        related_name='attempts',
     )
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.PositiveIntegerField(default=0)
@@ -73,7 +56,7 @@ class StudentAssessmentAttempt(models.Model):
         'accounts.Domain',
         related_name='+',
         blank=True,
-        help_text='Domains this test was taken for (e.g. user\'s target domains).',
+        help_text='Domains this test was taken for.',
     )
     recommended_domains = models.ManyToManyField(
         'accounts.Domain',
@@ -87,4 +70,4 @@ class StudentAssessmentAttempt(models.Model):
         ordering = ['-submitted_at']
 
     def __str__(self):
-        return f"{self.user.username} – {self.assessment.title} ({self.score}/{self.total_points})"
+        return f"{self.user.username} – {self.score}/{self.total_points}"

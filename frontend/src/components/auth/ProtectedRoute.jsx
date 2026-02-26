@@ -7,12 +7,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
+      <div className="flex items-center justify-center h-screen">
         <div>Loading...</div>
       </div>
     );

@@ -2,118 +2,223 @@ from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count
-from django.shortcuts import get_object_or_404
 from accounts.permissions import IsAdministrator, IsStudent
-from .models import SkillAssessment, AssessmentQuestion, StudentAssessmentAttempt
+from accounts.models import Domain
+from .models import AssessmentQuestion, StudentAssessmentAttempt
 from .serializers import (
-    SkillAssessmentSerializer,
-    SkillAssessmentCreateUpdateSerializer,
     AssessmentQuestionSerializer,
-    AssessmentForStudentSerializer,
-    AssessmentListItemSerializer,
     SubmitAnswersSerializer,
     AttemptResultSerializer,
+    ComposedAssessmentSerializer,
 )
-from .services import compute_score_and_recommendations
+from django.utils import timezone
+
+from .services import (
+    get_composed_questions,
+    compute_composed_score_and_recommend,
+    COMPOSED_MAX_ATTEMPTS_PER_DAY,
+    PASSING_PERCENT,
+)
+from .ml_recommendation import recommend_one_domain_ml
+from .pagination import DomainQuestionPagination
 
 
-class AdminAssessmentListCreateView(generics.ListCreateAPIView):
-    """GET/POST admin/assessments/ – List or create skill assessments (admin only)."""
+# --------------- Admin: questions per domain ---------------
+
+class AdminDomainQuestionListCreateView(generics.ListCreateAPIView):
+    """GET/POST admin/domains/<domain_id>/questions/ – List or add MCQs for a domain (admin only). 5 per page."""
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+    serializer_class = AssessmentQuestionSerializer
+    pagination_class = DomainQuestionPagination
 
     def get_queryset(self):
-        return SkillAssessment.objects.select_related('domain').prefetch_related('questions').all()
+        return AssessmentQuestion.objects.filter(
+            domain_id=self.kwargs['domain_id']
+        ).order_by('order', 'id')
 
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return SkillAssessmentCreateUpdateSerializer
-        return SkillAssessmentSerializer
-
-
-class AdminAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """GET/PUT/PATCH/DELETE admin/assessments/<id>/ – One assessment (admin only)."""
-    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
-    serializer_class = SkillAssessmentSerializer
-    queryset = SkillAssessment.objects.select_related('domain').prefetch_related('questions')
+    def perform_create(self, serializer):
+        serializer.save(domain_id=self.kwargs['domain_id'])
 
 
-class AdminAssessmentQuestionListCreateView(generics.ListCreateAPIView):
-    """GET/POST admin/assessments/<id>/questions/ – List or add MCQ questions (admin only)."""
+class AdminDomainQuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """GET/PUT/PATCH/DELETE admin/domains/<domain_id>/questions/<pk>/ – One question (admin only)."""
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
     serializer_class = AssessmentQuestionSerializer
 
     def get_queryset(self):
         return AssessmentQuestion.objects.filter(
-            assessment_id=self.kwargs['assessment_id']
-        ).order_by('order', 'id')
-
-    def perform_create(self, serializer):
-        serializer.save(assessment_id=self.kwargs['assessment_id'])
-
-
-# --------------- Student: list assessments, get for take, submit ---------------
-
-class StudentAssessmentListView(generics.ListAPIView):
-    """GET student/assessments/ – List active assessments (for current user's target domains)."""
-    permission_classes = [permissions.IsAuthenticated, IsStudent]
-    serializer_class = AssessmentListItemSerializer
-
-    def get_queryset(self):
-        qs = SkillAssessment.objects.filter(is_active=True).select_related('domain').prefetch_related('questions')
-        qs = qs.annotate(_question_count=Count('questions'))
-        profile = getattr(self.request.user, 'student_profile', None)
-        if profile and profile.target_domains.exists():
-            domain_ids = list(profile.target_domains.values_list('id', flat=True))
-            qs = qs.filter(domain_id__in=domain_ids)
-        return qs
-
-
-class StudentAssessmentDetailView(generics.RetrieveAPIView):
-    """GET student/assessments/<id>/ – Get assessment with questions for taking (no correct_option)."""
-    permission_classes = [permissions.IsAuthenticated, IsStudent]
-    serializer_class = AssessmentForStudentSerializer
-    queryset = SkillAssessment.objects.filter(is_active=True).select_related('domain').prefetch_related('questions')
-
-
-class StudentAssessmentSubmitView(APIView):
-    """POST student/assessments/<id>/submit/ – Submit answers; compute score and recommend domains."""
-    permission_classes = [permissions.IsAuthenticated, IsStudent]
-
-    def post(self, request, pk):
-        assessment = get_object_or_404(
-            SkillAssessment.objects.filter(is_active=True).prefetch_related('questions'),
-            pk=pk,
+            domain_id=self.kwargs['domain_id']
         )
+
+    def perform_destroy(self, instance):
+        domain_id = instance.domain_id
+        instance.delete()
+        # Renumber remaining questions in this domain to 0, 1, 2, ...
+        for idx, q in enumerate(
+            AssessmentQuestion.objects.filter(domain_id=domain_id).order_by('order', 'id')
+        ):
+            if q.order != idx:
+                q.order = idx
+                q.save(update_fields=['order'])
+
+
+class AdminDomainQuestionCountsView(APIView):
+    """GET admin/domains/question-counts/ – Question count per domain (admin only)."""
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+
+    def get(self, request):
+        counts = (
+            AssessmentQuestion.objects.values('domain_id')
+            .annotate(question_count=Count('id'))
+            .order_by('domain_id')
+        )
+        return Response([{'domain_id': c['domain_id'], 'question_count': c['question_count']} for c in counts])
+
+
+# --------------- Student: composed assessment only ---------------
+
+def _attempts_today(user):
+    """Count attempts submitted today (global per user, not per target domain)."""
+    today = timezone.now().date()
+    return StudentAssessmentAttempt.objects.filter(
+        user=user, submitted_at__date=today
+    ).count()
+
+
+class StudentComposedAssessmentView(APIView):
+    """GET student/assessments/composed/ – Get composed assessment. Requires 2–3 target domains; 2 attempts per day."""
+    permission_classes = [permissions.IsAuthenticated, IsStudent]
+
+    def get(self, request):
+        profile = getattr(request.user, 'student_profile', None)
+        target_count = profile.target_domains.count() if profile else 0
+        if target_count < 2:
+            return Response(
+                {'error': 'Select 2 to 3 domains of interest in your profile first, then you can take the assessment.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attempt_count_today = _attempts_today(request.user)
+        if attempt_count_today >= COMPOSED_MAX_ATTEMPTS_PER_DAY:
+            return Response(
+                {'error': f'You can take the assessment up to {COMPOSED_MAX_ATTEMPTS_PER_DAY} times per day. Try again tomorrow.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        questions, test_domain_ids = get_composed_questions(request.user)
+        if not questions:
+            return Response(
+                {'error': 'No questions available for your selected domains. Admin must add questions per domain first.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        data = {
+            'questions': questions,
+            'test_domain_ids': test_domain_ids,
+            'max_attempts': COMPOSED_MAX_ATTEMPTS_PER_DAY,
+            'attempt_count': attempt_count_today,
+        }
+        serializer = ComposedAssessmentSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class StudentComposedSubmitView(APIView):
+    """POST student/assessments/composed/submit/ – Submit composed test. Pass 70%%; on pass, recommend domain and add to profile."""
+    permission_classes = [permissions.IsAuthenticated, IsStudent]
+
+    def post(self, request):
+        attempt_count_today = _attempts_today(request.user)
+        if attempt_count_today >= COMPOSED_MAX_ATTEMPTS_PER_DAY:
+            return Response(
+                {'error': f'You can take the assessment up to {COMPOSED_MAX_ATTEMPTS_PER_DAY} times per day. Try again tomorrow.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         serializer = SubmitAnswersSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         answers_data = serializer.validated_data['answers']
-
-        attempt_count = StudentAssessmentAttempt.objects.filter(
-            user=request.user, assessment=assessment
-        ).count()
-        if attempt_count >= assessment.max_attempts:
-            return Response(
-                {'error': f'Maximum attempts ({assessment.max_attempts}) reached for this assessment.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         answers_tuples = [(a['question_id'], a['selected_option']) for a in answers_data]
-        score, total_points, recommended_ids = compute_score_and_recommendations(assessment, answers_tuples)
+
+        score, total_points, _per_domain, recommended_domain_id = compute_composed_score_and_recommend(
+            answers_tuples
+        )
+        percentage = round((score / total_points * 100), 1) if total_points else 0
+        passed = percentage >= PASSING_PERCENT
 
         attempt = StudentAssessmentAttempt.objects.create(
             user=request.user,
-            assessment=assessment,
             score=score,
             total_points=total_points,
             answers=serializer.validated_data['answers'],
         )
-        if recommended_ids:
-            attempt.recommended_domains.set(recommended_ids)
+        if passed and recommended_domain_id is not None:
+            attempt.recommended_domains.set([recommended_domain_id])
+            profile = getattr(request.user, 'student_profile', None)
+            if profile:
+                profile.target_domains.add(recommended_domain_id)
+        q_ids = [a['question_id'] for a in answers_data]
+        domain_ids = list(
+            AssessmentQuestion.objects.filter(id__in=q_ids)
+            .values_list('domain_id', flat=True)
+            .distinct()
+        )
+        if domain_ids:
+            attempt.test_domains.set(domain_ids)
 
         result = AttemptResultSerializer(attempt)
         data = result.data
-        data['percentage'] = round((score / total_points * 100), 1) if total_points else 0
-        data['passed'] = data['percentage'] >= 60
+        data['percentage'] = percentage
+        data['passed'] = passed
+        if not passed:
+            data['message'] = 'Score below 70%%. Take the test again. You have 2 attempts per day.'
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class StudentComposedSubmitMLView(APIView):
+    """POST student/assessments/composed/submit-ml/ – Same as submit but uses Scikit-learn for domain recommendation."""
+    permission_classes = [permissions.IsAuthenticated, IsStudent]
+
+    def post(self, request):
+        attempt_count_today = _attempts_today(request.user)
+        if attempt_count_today >= COMPOSED_MAX_ATTEMPTS_PER_DAY:
+            return Response(
+                {'error': f'You can take the assessment up to {COMPOSED_MAX_ATTEMPTS_PER_DAY} times per day. Try again tomorrow.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = SubmitAnswersSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        answers_data = serializer.validated_data['answers']
+        answers_tuples = [(a['question_id'], a['selected_option']) for a in answers_data]
+
+        score, total_points, per_domain, _ = compute_composed_score_and_recommend(answers_tuples)
+        recommended_domain_id = recommend_one_domain_ml(per_domain)
+
+        percentage = round((score / total_points * 100), 1) if total_points else 0
+        passed = percentage >= PASSING_PERCENT
+
+        attempt = StudentAssessmentAttempt.objects.create(
+            user=request.user,
+            score=score,
+            total_points=total_points,
+            answers=serializer.validated_data['answers'],
+        )
+        if passed and recommended_domain_id is not None:
+            attempt.recommended_domains.set([recommended_domain_id])
+            profile = getattr(request.user, 'student_profile', None)
+            if profile:
+                profile.target_domains.add(recommended_domain_id)
+        q_ids = [a['question_id'] for a in answers_data]
+        domain_ids = list(
+            AssessmentQuestion.objects.filter(id__in=q_ids)
+            .values_list('domain_id', flat=True)
+            .distinct()
+        )
+        if domain_ids:
+            attempt.test_domains.set(domain_ids)
+
+        result = AttemptResultSerializer(attempt)
+        data = result.data
+        data['percentage'] = percentage
+        data['passed'] = passed
+        if not passed:
+            data['message'] = 'Score below 70%%. Take the test again. You have 2 attempts per day.'
         return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -125,4 +230,4 @@ class StudentAttemptListView(generics.ListAPIView):
     def get_queryset(self):
         return StudentAssessmentAttempt.objects.filter(
             user=self.request.user
-        ).select_related('assessment').prefetch_related('recommended_domains').order_by('-submitted_at')
+        ).prefetch_related('recommended_domains', 'test_domains').order_by('-submitted_at')

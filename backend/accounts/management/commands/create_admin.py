@@ -1,15 +1,15 @@
 """
-Create an admin (superuser) for the Virtual Internship Hub.
+Create an app administrator (role=ADMINISTRATOR) who can use the frontend admin dashboard
+but cannot log in to Django admin (/admin/). Not a superuser.
 Usage: python manage.py create_admin
 Prompts for email, username, and password.
 """
 from django.core.management.base import BaseCommand
-from django.core.management import call_command
 from accounts.models import User
 
 
 class Command(BaseCommand):
-    help = 'Create an admin (superuser) for the site. Prompts for email, username, password.'
+    help = 'Create an app administrator (not a Django superuser; no /admin/ access). Prompts for email, username, password.'
 
     def add_arguments(self, parser):
         parser.add_argument('--email', type=str, help='Admin email')
@@ -40,6 +40,11 @@ class Command(BaseCommand):
         if User.objects.filter(username=username).exists():
             self.stderr.write(self.style.ERROR(f'User with username "{username}" already exists.'))
             return
-        user = User.objects.create_superuser(email=email, username=username, password=password)
-        self.stdout.write(self.style.SUCCESS(f'Admin created: {user.email} (username: {user.username})'))
-        self.stdout.write(self.style.SUCCESS('Log in at: /admin/'))
+        user = User.objects.create_user(
+            email=email,
+            username=username,
+            password=password,
+            role='ADMINISTRATOR',
+        )
+        self.stdout.write(self.style.SUCCESS(f'App administrator created: {user.email} (username: {user.username})'))
+        self.stdout.write(self.style.SUCCESS('This user can log in to the app admin dashboard only (not Django /admin/).'))

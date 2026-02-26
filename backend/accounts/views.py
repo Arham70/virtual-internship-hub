@@ -4,6 +4,7 @@ All API views in one file. Sections: Auth, Student, Mentor, Admin, Domains.
 from rest_framework import status, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import logout
@@ -249,19 +250,17 @@ class CreateAdministratorView(generics.CreateAPIView):
 
 
 class AdminStudentListView(generics.ListAPIView):
-    """GET admin/users/students/ – List all students (admin only). Administrator users are not listed."""
+    """GET admin/users/students/ – List all students (admin only). Paginated."""
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
     serializer_class = AdminStudentListItemSerializer
     queryset = User.objects.filter(role='STUDENT').select_related('student_profile').prefetch_related('student_profile__target_domains')
-    pagination_class = None
 
 
 class AdminMentorListView(generics.ListAPIView):
-    """GET admin/users/mentors/ – List all mentors (admin only). Administrator users are not listed."""
+    """GET admin/users/mentors/ – List all mentors (admin only). Paginated."""
     permission_classes = [permissions.IsAuthenticated, IsAdministrator]
     serializer_class = AdminMentorListItemSerializer
     queryset = User.objects.filter(role='MENTOR').select_related('mentor_profile', 'mentor_profile__expertise_domain')
-    pagination_class = None
 
 
 # --------------- Domains (shared) ---------------
@@ -272,3 +271,26 @@ class DomainListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     queryset = Domain.objects.all()
     pagination_class = None
+
+
+# --------------- Admin: Domain CRUD ---------------
+
+class AdminDomainPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 50
+
+
+class AdminDomainListCreateView(generics.ListCreateAPIView):
+    """GET/POST admin/domains/ – List or create domains (admin only). Paginated."""
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+    serializer_class = DomainSerializer
+    queryset = Domain.objects.all().order_by('name')
+    pagination_class = AdminDomainPagination
+
+
+class AdminDomainDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """GET/PUT/PATCH/DELETE admin/domains/<pk>/ – One domain (admin only)."""
+    permission_classes = [permissions.IsAuthenticated, IsAdministrator]
+    serializer_class = DomainSerializer
+    queryset = Domain.objects.all()

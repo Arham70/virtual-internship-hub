@@ -1,5 +1,11 @@
 import { useState, useCallback } from 'react';
 import { authApi } from '../api/auth.api';
+import {
+  buildSendOtpPayload,
+  buildVerifyOtpPayload,
+  buildResetPasswordPayload,
+  buildResendOtpPayload,
+} from '../services/auth.service';
 
 /**
  * Hook: forgot password flow (send OTP, verify OTP, reset password, resend OTP).
@@ -11,7 +17,7 @@ export function useForgotPassword() {
   const sendOtp = useCallback(async (email) => {
     setLoading(true);
     try {
-      await authApi.sendPasswordResetOtp(email);
+      await authApi.sendPasswordResetOtp(buildSendOtpPayload(email));
       return { success: true };
     } catch (err) {
       return {
@@ -26,7 +32,7 @@ export function useForgotPassword() {
   const verifyOtp = useCallback(async (email, otp) => {
     setLoading(true);
     try {
-      await authApi.verifyPasswordResetOtp(email, otp);
+      await authApi.verifyPasswordResetOtp(buildVerifyOtpPayload(email, otp));
       return { success: true };
     } catch (err) {
       return {
@@ -41,12 +47,9 @@ export function useForgotPassword() {
   const resetPassword = useCallback(async (email, otp, newPassword, newPasswordConfirm) => {
     setLoading(true);
     try {
-      await authApi.resetPassword({
-        email,
-        otp,
-        new_password: newPassword,
-        new_password_confirm: newPasswordConfirm,
-      });
+      await authApi.resetPassword(
+        buildResetPasswordPayload(email, otp, newPassword, newPasswordConfirm)
+      );
       return { success: true };
     } catch (err) {
       const msg =
@@ -63,7 +66,7 @@ export function useForgotPassword() {
   const resendOtp = useCallback(async (email) => {
     setLoading(true);
     try {
-      await authApi.resendPasswordResetOtp(email);
+      await authApi.resendPasswordResetOtp(buildResendOtpPayload(email));
       return { success: true };
     } catch (err) {
       return {

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authApi } from '../api/auth.api';
+import { buildLoginPayload, buildLogoutPayload } from '../services/auth.service';
 
 const AuthContext = createContext(null);
 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (formData) => {
     try {
-      const { data } = await authApi.login(formData);
+      const { data } = await authApi.login(buildLoginPayload(formData));
       const { user: u, tokens, profile } = data;
       localStorage.setItem('access_token', tokens.access);
       localStorage.setItem('refresh_token', tokens.refresh);
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const refreshToken = localStorage.getItem('refresh_token');
       if (refreshToken) {
-        await authApi.logout({ refresh_token: refreshToken });
+        await authApi.logout(buildLogoutPayload(refreshToken));
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -88,6 +89,7 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
+    refreshUser: fetchUserProfile,
     isStudent: user?.role === 'STUDENT',
     isMentor: user?.role === 'MENTOR',
     isAdministrator: user?.role === 'ADMINISTRATOR',
