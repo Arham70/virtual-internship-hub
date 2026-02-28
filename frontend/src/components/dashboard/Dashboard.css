@@ -242,14 +242,21 @@
 /* --------------- Student dashboard (professional UI) --------------- */
 .student-dashboard {
   min-height: 100vh;
-  background: #f8fafc;
+  width: 100%;
+  background: #f1f5f9;
 }
 
 .student-dashboard .dashboard-nav {
+  box-sizing: border-box;
+}
+
+.student-dashboard .dashboard-nav {
+  width: 100%;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  padding: 0 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .student-dashboard .dashboard-content {
@@ -263,12 +270,12 @@
 }
 
 .student-dashboard .welcome-card {
-  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #2563eb 100%);
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
   color: #fff;
   border-radius: 16px;
   padding: 2rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 10px 40px rgba(30, 64, 175, 0.25);
+  box-shadow: 0 10px 40px rgba(15, 118, 110, 0.2);
   border: none;
 }
 
@@ -315,15 +322,16 @@
   font-size: 0.875rem;
 }
 
-/* Student nav (no sidebar, top nav with links) */
+/* Student nav: full width, professional */
 .student-dashboard-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+  width: 100%;
+  padding: 0 2rem;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .student-dashboard-nav .nav-links {
@@ -353,8 +361,8 @@
 }
 
 .student-dashboard-nav .nav-links button.active {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #ccfbf1;
+  color: #0f766e;
 }
 
 .student-dashboard-nav .nav-user-name {
@@ -477,8 +485,8 @@
 }
 
 .assessment-cta-block .assessment-cta-icon.select {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #ccfbf1;
+  color: #0f766e;
 }
 
 .assessment-cta-block .assessment-cta-icon.alert {
@@ -504,7 +512,7 @@
 .assessment-cta-block .btn-start-assessment {
   width: 100%;
   padding: 0.875rem 1.25rem;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -515,7 +523,7 @@
 }
 
 .assessment-cta-block .btn-start-assessment:hover {
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
 }
 
 .assessment-cta-block .attempts-meta {
@@ -713,8 +721,8 @@
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #ccfbf1;
+  color: #0f766e;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -734,7 +742,7 @@
 
 .student-dashboard .btn-task-start {
   padding: 0.4rem 0.875rem;
-  background: #2563eb;
+  background: #0f766e;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -745,13 +753,13 @@
 }
 
 .student-dashboard .btn-task-start:hover {
-  background: #1d4ed8;
+  background: #0d9488;
 }
 
 .student-dashboard .btn-outline-primary {
   padding: 0.5rem 1.25rem;
-  border: 1px solid #2563eb;
-  color: #2563eb;
+  border: 1px solid #0f766e;
+  color: #0f766e;
   background: transparent;
   border-radius: 10px;
   font-weight: 500;
@@ -760,8 +768,8 @@
 }
 
 .student-dashboard .btn-outline-primary:hover {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #ccfbf1;
+  color: #0d9488;
 }
 
 .student-dashboard .tasks-section-card {
@@ -777,7 +785,352 @@
   border-color: #cbd5e1;
 }
 
-/* Chatbot */
+/* --------------- Mentor dashboard --------------- */
+.mentor-dashboard {
+  min-height: 100vh;
+  width: 100%;
+  background: #f1f5f9;
+}
+
+.mentor-dashboard .dashboard-nav.mentor-dashboard-nav {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.mentor-dashboard-nav-inner {
+  width: 100%;
+  margin: 0;
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.mentor-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.mentor-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mentor-logo-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.mentor-logo-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mentor-logo-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.mentor-nav-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mentor-nav-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.mentor-nav-btn.active {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.mentor-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 1rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+.mentor-user-meta {
+  text-align: right;
+}
+
+.mentor-user-name {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mentor-user-role {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.mentor-nav-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mentor-nav-icon-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.mentor-dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.mentor-welcome-card {
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #8b5cf6 100%);
+  color: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 40px rgba(109, 40, 217, 0.2);
+}
+
+.mentor-welcome-card h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.mentor-welcome-card p {
+  margin: 0;
+  opacity: 0.95;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.mentor-section-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.mentor-section-card h3 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mentor-section-desc {
+  margin: 0 0 1.25rem 0;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.mentor-loading,
+.mentor-empty {
+  color: #64748b;
+  margin: 0;
+}
+
+.mentor-student-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mentor-student-card {
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: box-shadow 0.15s;
+}
+
+.mentor-student-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.mentor-student-name {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.mentor-student-domains {
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.mentor-student-domains-label {
+  margin-right: 0.5rem;
+  color: #64748b;
+}
+
+.mentor-domain-tag {
+  display: inline-block;
+  margin: 0.2rem 0.35rem 0.2rem 0;
+  padding: 0.2rem 0.6rem;
+  background: #ede9fe;
+  color: #6d28d9;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.mentor-domain-none {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.mentor-profile-card {
+  max-width: 36rem;
+}
+
+.mentor-profile-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+.mentor-profile-success {
+  color: #059669;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+.mentor-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mentor-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.mentor-form-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+}
+
+.mentor-form-input:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.mentor-form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.mentor-form-select {
+  cursor: pointer;
+}
+
+.mentor-form-check {
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.mentor-form-check input {
+  margin-right: 0.5rem;
+}
+
+.mentor-btn-save {
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: box-shadow 0.2s;
+}
+
+.mentor-btn-save:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.35);
+}
+
+.mentor-btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.mentor-btn-back {
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: none;
+  color: #6d28d9;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mentor-btn-back:hover {
+  text-decoration: underline;
+}
+
+/* Chatbot (student dashboard) */
+.student-dashboard .chatbot-trigger {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
+}
+
+.student-dashboard .chatbot-trigger:hover {
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.45);
+}
+
 .chatbot-trigger {
   position: fixed;
   bottom: 1.5rem;

@@ -20,7 +20,7 @@ const features = [
 function AuthLeftPanel({ variant = 'student', title, subtitle }) {
   const theme = authTheme[variant] || authTheme.student;
   const Icon = variantIcons[variant] || GraduationCapIcon;
-  const textMuted = variant === 'admin' ? 'text-gray-300' : 'text-blue-100';
+  const textMuted = variant === 'admin' ? 'text-gray-300' : variant === 'mentor' ? 'text-violet-100' : 'text-teal-100';
 
   return (
     <div className={`hidden lg:flex lg:w-1/2 relative overflow-hidden ${theme.panelBg}`}>
@@ -33,7 +33,7 @@ function AuthLeftPanel({ variant = 'student', title, subtitle }) {
           </div>
           <div>
             <h1 className="text-2xl tracking-tight font-semibold">{theme.portalName}</h1>
-            <p className={`text-sm ${variant === 'admin' ? 'text-gray-400' : 'text-blue-100'}`}>{theme.tagline}</p>
+            <p className={`text-sm ${variant === 'admin' ? 'text-gray-400' : variant === 'mentor' ? 'text-violet-100' : 'text-teal-100'}`}>{theme.tagline}</p>
           </div>
         </div>
 

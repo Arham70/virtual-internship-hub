@@ -41,17 +41,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (formData) => {
-    try {
-      const { data } = await authApi.register(formData);
-      const { user: u, profile } = data;
-      // Do not store tokens or set user – redirect to login so they sign in after signup
-      return { success: true, user: { ...u, profile } };
-    } catch (error) {
-      return { success: false, error: error.response?.data || { message: 'Registration failed' } };
-    }
-  };
-
   const login = async (formData) => {
     try {
       const { data } = await authApi.login(buildLoginPayload(formData));
@@ -86,7 +75,6 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     isAuthenticated,
-    register,
     login,
     logout,
     refreshUser: fetchUserProfile,

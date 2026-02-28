@@ -20,8 +20,8 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const goToStudentSignup = () => navigate('/student/signup');
-  const goToMentorSignup = () => navigate('/mentor/signup');
+  const goToStudentLogin = () => navigate('/student/login');
+  const goToMentorLogin = () => navigate('/mentor/login');
   const goToAdminLogin = () => navigate('/admin/login');
 
   return (
@@ -44,8 +44,8 @@ export default function HomePage() {
               <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition-colors">How It Works</a>
               <a href="#testimonials" className="text-gray-700 hover:text-blue-600 transition-colors">Testimonials</a>
               <div className="flex items-center gap-3 ml-4 pl-4 border-l border-gray-300">
-                <button type="button" onClick={goToStudentSignup} className="text-gray-700 hover:text-blue-600 transition-colors">Student</button>
-                <button type="button" onClick={goToMentorSignup} className="text-gray-700 hover:text-blue-600 transition-colors">Mentor</button>
+                <button type="button" onClick={goToStudentLogin} className="text-gray-700 hover:text-blue-600 transition-colors">Student</button>
+                <button type="button" onClick={goToMentorLogin} className="text-gray-700 hover:text-blue-600 transition-colors">Mentor</button>
                 <button type="button" onClick={goToAdminLogin} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all">Admin</button>
               </div>
             </div>
@@ -64,8 +64,8 @@ export default function HomePage() {
                 <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 px-3 py-2">How It Works</a>
                 <a href="#testimonials" className="text-gray-700 hover:text-blue-600 px-3 py-2">Testimonials</a>
                 <div className="h-px bg-gray-200 my-2" />
-                <button type="button" onClick={goToStudentSignup} className="text-left px-3 py-2 text-gray-700 hover:text-blue-600">Student</button>
-                <button type="button" onClick={goToMentorSignup} className="text-left px-3 py-2 text-gray-700 hover:text-blue-600">Mentor</button>
+                <button type="button" onClick={goToStudentLogin} className="text-left px-3 py-2 text-gray-700 hover:text-blue-600">Student</button>
+                <button type="button" onClick={goToMentorLogin} className="text-left px-3 py-2 text-gray-700 hover:text-blue-600">Mentor</button>
                 <button type="button" onClick={goToAdminLogin} className="px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg">Admin</button>
               </div>
             </div>
@@ -90,18 +90,18 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4">
                 <button
                   type="button"
-                  onClick={goToStudentSignup}
+                  onClick={goToStudentLogin}
                   className="px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-xl transition-all text-lg inline-flex items-center"
                 >
-                  Start as Student
+                  Login as Student
                   <ArrowRightIcon className="ml-2 size-5 inline-block" />
                 </button>
                 <button
                   type="button"
-                  onClick={goToMentorSignup}
+                  onClick={goToMentorLogin}
                   className="px-8 py-6 bg-white text-gray-900 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all text-lg"
                 >
-                  Join as Mentor
+                  Login as Mentor
                 </button>
               </div>
               <div className="flex flex-wrap gap-8 pt-4">
@@ -210,11 +210,11 @@ export default function HomePage() {
           <h2 className="text-4xl lg:text-5xl text-white mb-6">Ready to Transform Your Career?</h2>
           <p className="text-xl text-blue-100 mb-10">Join thousands of students and mentors building their future today.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <button type="button" onClick={goToStudentSignup} className="px-8 py-6 bg-white text-blue-600 rounded-xl hover:shadow-2xl transition-all text-lg inline-flex items-center">
+            <button type="button" onClick={goToStudentLogin} className="px-8 py-6 bg-white text-blue-600 rounded-xl hover:shadow-2xl transition-all text-lg inline-flex items-center">
               Get Started Free
               <ArrowRightIcon className="ml-2 size-5 inline-block" />
             </button>
-            <button type="button" onClick={goToMentorSignup} className="px-8 py-6 bg-transparent text-white border-2 border-white rounded-xl hover:bg-white hover:text-blue-600 transition-all text-lg">
+            <button type="button" onClick={goToMentorLogin} className="px-8 py-6 bg-transparent text-white border-2 border-white rounded-xl hover:bg-white hover:text-blue-600 transition-all text-lg">
               Become a Mentor
             </button>
           </div>

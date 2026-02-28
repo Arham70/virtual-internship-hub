@@ -1,6 +1,6 @@
 /**
- * Auth page theme per role (Figma: Student = blue/indigo, Mentor = purple/pink, Admin = gray).
- * Used by AuthLayout and AuthLeftPanel for variant-based styling.
+ * Auth page theme per role – matches dashboard colors.
+ * Student = teal (student dashboard), Mentor = violet/purple (mentor dashboard), Admin = gray.
  */
 import { ROLE } from './constants';
 
@@ -16,18 +16,18 @@ export function getAuthVariantFromRole(role) {
   return AUTH_VARIANT.STUDENT;
 }
 
-/** Tailwind classes and copy per variant */
+/** Tailwind classes and copy per variant – aligned with Student (teal) and Mentor (violet) dashboards */
 export const authTheme = {
   student: {
-    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50/80 to-indigo-50/90',
-    panelBg: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
-    cardShadow: 'shadow-xl shadow-blue-500/5',
-    logoGradient: 'from-blue-600 to-indigo-600',
-    accent: 'blue',
+    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-teal-50/80 to-slate-100',
+    panelBg: 'bg-gradient-to-br from-teal-800 via-teal-700 to-teal-600',
+    cardShadow: 'shadow-xl shadow-teal-500/10',
+    logoGradient: 'from-teal-700 to-teal-600',
+    accent: 'teal',
     portalName: 'Student Portal',
     tagline: 'Learn • Build • Succeed',
-    accentClass: 'text-blue-600 hover:text-blue-700',
-    buttonClass: 'bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+    accentClass: 'text-teal-600 hover:text-teal-700',
+    buttonClass: 'bg-teal-600 hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2',
     stats: [
       { value: '10K+', label: 'Active Students' },
       { value: '1000+', label: 'Projects' },
@@ -35,15 +35,15 @@ export const authTheme = {
     ],
   },
   mentor: {
-    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50',
-    panelBg: 'bg-gradient-to-br from-purple-600 via-pink-600 to-rose-700',
-    cardShadow: 'shadow-2xl shadow-purple-500/10',
-    logoGradient: 'from-purple-600 to-pink-600',
-    accent: 'purple',
+    pageBg: 'min-h-screen flex bg-gradient-to-br from-slate-50 via-violet-50/80 to-purple-50/80',
+    panelBg: 'bg-gradient-to-br from-violet-800 via-purple-600 to-violet-500',
+    cardShadow: 'shadow-2xl shadow-violet-500/10',
+    logoGradient: 'from-violet-700 to-purple-600',
+    accent: 'violet',
     portalName: 'Mentor Portal',
     tagline: 'Guide • Inspire • Transform',
-    accentClass: 'text-purple-600 hover:text-purple-700',
-    buttonClass: 'bg-purple-600 hover:bg-purple-700',
+    accentClass: 'text-violet-600 hover:text-violet-700',
+    buttonClass: 'bg-violet-700 hover:bg-purple-600 focus:ring-2 focus:ring-violet-500 focus:ring-offset-2',
     stats: [
       { value: '500+', label: 'Active Mentors' },
       { value: '5000+', label: 'Students Mentored' },

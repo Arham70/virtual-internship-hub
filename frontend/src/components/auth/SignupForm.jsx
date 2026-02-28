@@ -125,12 +125,12 @@ function SignupForm({
               showPasswordToggle
             />
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Target Domains</label>
+              <label className="block text-gray-700 text-sm font-medium mb-1">Target Domains (select 2–3)</label>
               <MultiSelect
                 options={domains}
                 value={targetDomainIds}
                 onChange={onTargetDomainIdsChange}
-                placeholder={domainsLoading ? 'Loading domains…' : 'Select areas of interest'}
+                placeholder={domainsLoading ? 'Loading domains…' : 'Select 2 to 3 areas of interest'}
                 disabled={loading || domainsLoading}
               />
               {domainsError && (

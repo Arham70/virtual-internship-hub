@@ -9,7 +9,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 
-from ..models import PasswordResetOTP, User
+from ..models import PasswordResetOTP, PendingRegistration, User
 
 
 def generate_otp(length=6):
@@ -71,3 +71,50 @@ def verify_password_reset_otp(email, otp):
 def consume_otp(record):
     """Delete OTP after successful password reset."""
     record.delete()
+
+
+def create_and_send_signup_verification_otp(email, signup_payload):
+    """
+    Store pending signup and send 6-digit OTP to email.
+    signup_payload: dict with password, username, role, first_name, last_name, target_domain_ids, etc.
+    Returns (record, True) on success; (None, False) if email already registered.
+    """
+    if User.objects.filter(email=email).exists():
+        return None, False
+
+    expire_minutes = getattr(settings, 'SIGNUP_OTP_EXPIRE_MINUTES', 10)
+    expires_at = timezone.now() + timedelta(minutes=expire_minutes)
+    otp = generate_otp(6)
+
+    PendingRegistration.objects.filter(email=email).delete()
+
+    record = PendingRegistration.objects.create(
+        email=email,
+        otp=otp,
+        expires_at=expires_at,
+        signup_payload=signup_payload,
+    )
+
+    subject = 'Verify your email - Virtual Internship Hub'
+    message = (
+        f'Your verification code is: {otp}\n\n'
+        f'This code expires in {expire_minutes} minutes. Do not share it.\n\n'
+        'If you did not sign up, please ignore this email.'
+    )
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+    send_mail(subject, message, from_email, [email], fail_silently=False)
+    return record, True
+
+
+def verify_signup_otp_and_get_payload(email, otp):
+    """
+    Verify OTP for signup. Returns signup_payload dict if valid, else None.
+    Caller should create User and then delete the PendingRegistration.
+    """
+    try:
+        record = PendingRegistration.objects.get(email=email, otp=otp)
+    except PendingRegistration.DoesNotExist:
+        return None
+    if record.is_expired:
+        return None
+    return record.signup_payload

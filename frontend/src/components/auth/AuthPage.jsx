@@ -4,12 +4,14 @@ import { useAuth } from '../../hooks/useAuth';
 import { useDomains } from '../../hooks/useDomains';
 import { useForgotPassword } from '../../hooks/useForgotPassword';
 import { buildSignupPayload, validateSignup } from '../../services/authPage.service';
-import { VIEW, FORGOT_STEP, ROLE } from '../../utilities/constants';
+import { VIEW, FORGOT_STEP, SIGNUP_STEP, ROLE } from '../../utilities/constants';
+import { authApi } from '../../api/auth.api';
 import { getAuthVariantFromRole, authTheme } from '../../utilities/authThemes';
 import { redirectByRole, getErrorMessage } from '../../utilities/authUtils';
 import AuthLayout from './AuthLayout';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
+import VerifySignupForm from './VerifySignupForm';
 import ForgotPasswordForm from './ForgotPasswordForm';
 
 /** Parse pathname to get role and initial view: /student/login, /mentor/signup, /admin/login */
@@ -56,12 +58,15 @@ export default function AuthPage(props) {
   const isAdmin = initialRole === ROLE.ADMINISTRATOR;
   const effectiveInitialView = isAdmin ? VIEW.LOGIN : (propInitialView ?? (routeAuth?.initialView) ?? (isRegisterPage ? VIEW.SIGNUP : VIEW.LOGIN));
 
-  const { login, register } = useAuth();
+  const { login } = useAuth();
   const [view, setView] = useState(effectiveInitialView);
   const { domains, loading: domainsLoading, error: domainsError } = useDomains(view === VIEW.SIGNUP && !isAdmin);
   const { sendOtp, verifyOtp, resetPassword, resendOtp, loading: forgotLoading } = useForgotPassword();
   const [role, setRole] = useState(initialRole);
   const [forgotStep, setForgotStep] = useState(FORGOT_STEP.EMAIL);
+  const [signupStep, setSignupStep] = useState(SIGNUP_STEP.FORM);
+  const [pendingSignupPayload, setPendingSignupPayload] = useState(null);
+  const [signupOtp, setSignupOtp] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const roleLocked = propRole != null || (routeAuth != null);
@@ -99,7 +104,12 @@ export default function AuthPage(props) {
   }, [pathname, initialRole, propInitialView, routeAuth?.initialView]);
 
   const leftContent = useMemo(() => getLeftPanelContent(role, view), [role, view]);
-  const cardContent = useMemo(() => getCardTitleAndSubtitle(role, view), [role, view]);
+  const cardContent = useMemo(() => {
+    if (view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP) {
+      return { title: 'Verify your email', subtitle: `Enter the 6-digit code we sent to ${pendingSignupPayload?.email || ''}` };
+    }
+    return getCardTitleAndSubtitle(role, view);
+  }, [role, view, signupStep, pendingSignupPayload]);
 
   const clearError = () => setError('');
 
@@ -181,12 +191,61 @@ export default function AuthPage(props) {
     setError('');
     if (!validateSignup(signupFields, setError)) return;
     setLoading(true);
-    const result = await register(buildSignupPayload(signupFields));
-    setLoading(false);
-    if (result.success) {
+    const payload = buildSignupPayload(signupFields);
+    try {
+      await authApi.sendSignupOtp(payload);
+      setPendingSignupPayload(payload);
+      setSignupStep(SIGNUP_STEP.OTP);
+      setSignupOtp('');
+    } catch (err) {
+      setError(getErrorMessage(err.response?.data || { message: 'Failed to send code.' }));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleVerifySignup(e) {
+    e.preventDefault();
+    setError('');
+    if (signupOtp.length !== 6) {
+      setError('Please enter the 6-digit code.');
+      return;
+    }
+    if (!pendingSignupPayload?.email) {
+      setError('Session expired. Please start signup again.');
+      setSignupStep(SIGNUP_STEP.FORM);
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.verifySignupOtp({ email: pendingSignupPayload.email, otp: signupOtp });
       const loginPath = role === ROLE.MENTOR ? '/mentor/login' : '/student/login';
       navigate(loginPath, { state: { fromSignup: true } });
-    } else setError(getErrorMessage(result.error));
+    } catch (err) {
+      setError(getErrorMessage(err.response?.data || { message: 'Invalid or expired code.' }));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResendSignupOtp() {
+    setError('');
+    if (!pendingSignupPayload) return;
+    setLoading(true);
+    try {
+      await authApi.sendSignupOtp(pendingSignupPayload);
+      setSignupOtp('');
+    } catch (err) {
+      setError(getErrorMessage(err.response?.data || { message: 'Failed to resend code.' }));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleBackToSignupForm() {
+    setSignupStep(SIGNUP_STEP.FORM);
+    setSignupOtp('');
+    setError('');
   }
 
   const loadingAny = loading || forgotLoading;
@@ -239,9 +298,24 @@ export default function AuthPage(props) {
           onBackToEmail={() => { setForgotStep(FORGOT_STEP.EMAIL); setOtp(''); }}
           onBackToOtp={() => setForgotStep(FORGOT_STEP.OTP)}
           onBackToLogin={() => { setView(VIEW.LOGIN); clearError(); }}
+          accentClass={theme.accentClass}
+          buttonClass={theme.buttonClass}
         />
       )}
-      {view === VIEW.SIGNUP && (
+      {view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP && (
+        <VerifySignupForm
+          email={pendingSignupPayload?.email || ''}
+          otp={signupOtp}
+          loading={loading}
+          onOtpChange={setSignupOtp}
+          onVerify={handleVerifySignup}
+          onResend={handleResendSignupOtp}
+          onBackToForm={handleBackToSignupForm}
+          accentClass={theme.accentClass}
+          buttonClass={theme.buttonClass}
+        />
+      )}
+      {view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.FORM && (
         <SignupForm
           role={role}
           onRoleChange={(r) => { setRole(r); clearError(); }}
@@ -279,7 +353,7 @@ export default function AuthPage(props) {
           onExpertiseDomainIdChange={setExpertiseDomainId}
           loading={loading}
           onSubmit={handleSignup}
-          onSwitchToLogin={() => { setView(VIEW.LOGIN); clearError(); }}
+          onSwitchToLogin={() => { setView(VIEW.LOGIN); setSignupStep(SIGNUP_STEP.FORM); setPendingSignupPayload(null); setSignupOtp(''); clearError(); }}
         />
       )}
     </AuthLayout>

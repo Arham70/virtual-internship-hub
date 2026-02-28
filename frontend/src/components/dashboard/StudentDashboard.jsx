@@ -290,7 +290,11 @@ function AssessmentResultView({ result, onBack }) {
   const percentage = result.percentage ?? 0;
   const passed = result.passed ?? percentage >= PASSING_PERCENT;
   const score = result.score ?? 0;
-  const total = result.total_points ?? 0;
+  const totalPoints = result.total_points ?? 0;
+  const questionCount = result.question_count ?? (result.answers?.length ?? 0);
+  const correctCount = result.correct_count ?? (questionCount ? score : 0);
+  const displayTotal = questionCount > 0 ? questionCount : totalPoints;
+  const displayCorrect = questionCount > 0 ? correctCount : score;
   const recommended = result.recommended_domains?.[0];
 
   return (
@@ -314,7 +318,7 @@ function AssessmentResultView({ result, onBack }) {
           </div>
           <div style={{ marginBottom: '0.5rem' }}>
             <span className="quiz-score-percent">{percentage}%</span>
-            <span className="quiz-score-detail">({score} / {total})</span>
+            <span className="quiz-score-detail">({displayCorrect} / {displayTotal} questions)</span>
           </div>
           <div className="quiz-score-bar">
             <div className="quiz-score-bar-fill" style={{ width: `${Math.min(100, percentage)}%`, background: passed ? '#16a34a' : '#dc2626' }} />
@@ -323,11 +327,11 @@ function AssessmentResultView({ result, onBack }) {
 
         <div className="quiz-results-row">
           <span>Correct Answers</span>
-          <span className="correct">{score}</span>
+          <span className="correct">{displayCorrect}</span>
         </div>
         <div className="quiz-results-row">
           <span>Incorrect Answers</span>
-          <span className="incorrect">{total - score}</span>
+          <span className="incorrect">{displayTotal - displayCorrect}</span>
         </div>
         <div className="quiz-results-row">
           <span>Passing Score</span>
@@ -359,10 +363,10 @@ function StudentDashboard() {
   const { user, logout, refreshUser } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
   const [assessmentPassed, setAssessmentPassed] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
+  const [, setAttemptCount] = useState(0);
   const [attemptCountToday, setAttemptCountToday] = useState(0); // from attempts list, for "X of 2 used today"
   const [lastAttempt, setLastAttempt] = useState(null);
-  const [tasksCompleted, setTasksCompleted] = useState(0); // real data: replace with API when available
+  const [tasksCompleted] = useState(0); // real data: replace with API when available
   const [showNotifications, setShowNotifications] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [assessmentView, setAssessmentView] = useState('idle'); // 'idle' | 'intro' | 'test' | 'result'
@@ -608,7 +612,7 @@ function StudentDashboard() {
         <div className="student-dashboard-nav">
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)' }}>
+              <div style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 2px 8px rgba(15, 118, 110, 0.3)' }}>
                 <GraduationCapIcon className="w-6 h-6" />
               </div>
               <div className="hidden sm:block">
@@ -812,7 +816,7 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
       {/* Progress summary */}
       <div className="progress-cards-grid">
         <div className="progress-card">
-          <div className="progress-icon" style={{ background: '#eff6ff', color: '#2563eb' }}><TargetIcon className="w-6 h-6" /></div>
+          <div className="progress-icon" style={{ background: '#ccfbf1', color: '#0f766e' }}><TargetIcon className="w-6 h-6" /></div>
           <div>
             <div className="progress-value">{tasksCompleted}</div>
             <div className="progress-label">Tasks Completed</div>

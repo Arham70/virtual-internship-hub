@@ -66,8 +66,12 @@ export function validateSignup(fields, setError) {
       setError('Passwords do not match.');
       return false;
     }
-    if (targetDomainIds.length === 0) {
-      setError('Please select at least one target domain.');
+    if (targetDomainIds.length < 2) {
+      setError('Please select 2 to 3 target domains.');
+      return false;
+    }
+    if (targetDomainIds.length > 3) {
+      setError('Please select at most 3 target domains.');
       return false;
     }
   } else {

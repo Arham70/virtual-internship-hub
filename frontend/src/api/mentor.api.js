@@ -4,4 +4,5 @@ export const mentorApi = {
   getProfile: () => client.get('/mentors/profile/'),
   updateProfile: (data) => client.put('/mentors/profile/', data),
   getList: () => client.get('/mentors/'),
+  getStudents: () => client.get('/students/'),
 };

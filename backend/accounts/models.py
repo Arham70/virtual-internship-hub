@@ -55,6 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='STUDENT')
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_email_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
     
     objects = UserManager()
@@ -157,6 +158,26 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"OTP for {self.email} (expires {self.expires_at})"
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+
+class PendingRegistration(models.Model):
+    """Stores signup payload + 6-digit OTP until email is verified. Deleted after account creation."""
+    email = models.EmailField(db_index=True)
+    otp = models.CharField(max_length=6)
+    expires_at = models.DateTimeField(db_index=True)
+    signup_payload = models.JSONField()  # password, username, role, first_name, last_name, ...
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'pending_registrations'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Pending signup {self.email} (expires {self.expires_at})"
 
     @property
     def is_expired(self):

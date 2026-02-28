@@ -24,7 +24,7 @@ function AuthLayout({ variant = 'student', leftTitle, leftSubtitle, cardTitle, c
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 overflow-y-auto">
         <div className="w-full max-w-md">
-          <div className={`auth-card bg-white rounded-2xl border border-gray-200/80 p-8 shadow-xl ${theme.cardShadow}`}>
+          <div className={`auth-card auth-card--${variant} bg-white rounded-2xl border border-gray-200/80 p-8 shadow-xl ${theme.cardShadow}`}>
             {/* Back to Home */}
             {showBackToHome && (
               <Link to="/" className="mb-6 text-gray-600 hover:text-gray-900 inline-flex items-center gap-2 transition-colors">

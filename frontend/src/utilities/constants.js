@@ -12,6 +12,12 @@ export const FORGOT_STEP = {
   NEW_PASSWORD: 'newPassword',
 };
 
+/** Signup steps (form → verify email OTP) */
+export const SIGNUP_STEP = {
+  FORM: 'form',
+  OTP: 'otp',
+};
+
 /** User roles */
 export const ROLE = {
   STUDENT: 'STUDENT',

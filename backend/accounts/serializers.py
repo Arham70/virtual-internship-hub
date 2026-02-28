@@ -17,7 +17,16 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
-    
+
+    def validate_target_domain_ids(self, value):
+        """Require 2 to 3 target domains when updating."""
+        ids = list(value) if value else []
+        if len(ids) < 2:
+            raise serializers.ValidationError("Select at least 2 target domains.")
+        if len(ids) > 3:
+            raise serializers.ValidationError("Select at most 3 target domains.")
+        return value
+
     class Meta:
         model = StudentProfile
         fields = ('first_name', 'last_name', 'phone_number', 'bio', 
@@ -47,7 +56,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'role', 'is_superuser', 'is_superadmin', 'created_at',
+        fields = ('id', 'email', 'username', 'role', 'is_superuser', 'is_superadmin', 'is_email_verified', 'created_at',
                   'student_profile', 'mentor_profile')
         read_only_fields = ('id', 'created_at')
 
@@ -100,6 +109,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if role == 'STUDENT':
             if not attrs.get('first_name') or not attrs.get('last_name'):
                 raise serializers.ValidationError("First name and last name required for students")
+            ids = attrs.get('target_domain_ids') or []
+            if len(ids) < 2:
+                raise serializers.ValidationError(
+                    {"target_domain_ids": "Select at least 2 target domains."}
+                )
+            if len(ids) > 3:
+                raise serializers.ValidationError(
+                    {"target_domain_ids": "Select at most 3 target domains."}
+                )
         elif role == 'MENTOR':
             if not attrs.get('professional_bio'):
                 raise serializers.ValidationError("Professional bio required for mentors")
@@ -213,6 +231,12 @@ class SendPasswordResetOTPSerializer(serializers.Serializer):
 
 
 class VerifyPasswordResetOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True, min_length=6, max_length=6)
+
+
+class VerifySignupOTPSerializer(serializers.Serializer):
+    """Email + 6-digit OTP to verify and complete registration."""
     email = serializers.EmailField(required=True)
     otp = serializers.CharField(required=True, min_length=6, max_length=6)
 

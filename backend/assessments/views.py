@@ -136,11 +136,12 @@ class StudentComposedSubmitView(APIView):
         answers_data = serializer.validated_data['answers']
         answers_tuples = [(a['question_id'], a['selected_option']) for a in answers_data]
 
-        score, total_points, _per_domain, recommended_domain_id = compute_composed_score_and_recommend(
+        score, total_points, correct_count, _per_domain, recommended_domain_id = compute_composed_score_and_recommend(
             answers_tuples
         )
         percentage = round((score / total_points * 100), 1) if total_points else 0
         passed = percentage >= PASSING_PERCENT
+        question_count = len(answers_data)
 
         attempt = StudentAssessmentAttempt.objects.create(
             user=request.user,
@@ -166,6 +167,8 @@ class StudentComposedSubmitView(APIView):
         data = result.data
         data['percentage'] = percentage
         data['passed'] = passed
+        data['question_count'] = question_count
+        data['correct_count'] = correct_count
         if not passed:
             data['message'] = 'Score below 70%%. Take the test again. You have 2 attempts per day.'
         return Response(data, status=status.HTTP_201_CREATED)
@@ -187,11 +190,12 @@ class StudentComposedSubmitMLView(APIView):
         answers_data = serializer.validated_data['answers']
         answers_tuples = [(a['question_id'], a['selected_option']) for a in answers_data]
 
-        score, total_points, per_domain, _ = compute_composed_score_and_recommend(answers_tuples)
+        score, total_points, correct_count, per_domain, _ = compute_composed_score_and_recommend(answers_tuples)
         recommended_domain_id = recommend_one_domain_ml(per_domain)
 
         percentage = round((score / total_points * 100), 1) if total_points else 0
         passed = percentage >= PASSING_PERCENT
+        question_count = len(answers_data)
 
         attempt = StudentAssessmentAttempt.objects.create(
             user=request.user,
@@ -217,6 +221,8 @@ class StudentComposedSubmitMLView(APIView):
         data = result.data
         data['percentage'] = percentage
         data['passed'] = passed
+        data['question_count'] = question_count
+        data['correct_count'] = correct_count
         if not passed:
             data['message'] = 'Score below 70%%. Take the test again. You have 2 attempts per day.'
         return Response(data, status=status.HTTP_201_CREATED)

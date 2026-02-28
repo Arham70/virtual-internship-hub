@@ -11,7 +11,7 @@ from django.contrib.auth import logout
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
-from .models import User, StudentProfile, MentorProfile, Domain
+from .models import User, StudentProfile, MentorProfile, Domain, PendingRegistration
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -23,6 +23,7 @@ from .serializers import (
     SendPasswordResetOTPSerializer,
     VerifyPasswordResetOTPSerializer,
     ResetPasswordSerializer,
+    VerifySignupOTPSerializer,
     AdminStudentListItemSerializer,
     AdminMentorListItemSerializer,
 )
@@ -31,7 +32,10 @@ from .services.email import (
     create_and_send_password_reset_otp,
     verify_password_reset_otp,
     consume_otp,
+    create_and_send_signup_verification_otp,
+    verify_signup_otp_and_get_payload,
 )
+from .services.registration import create_user_from_verified_signup_payload
 
 
 def tokens_and_user_response(user):
@@ -51,19 +55,53 @@ def tokens_and_user_response(user):
 
 # --------------- Auth ---------------
 
-class RegisterView(generics.CreateAPIView):
-    """POST auth/register/ – Create account (Student or Mentor)."""
-    queryset = User.objects.none()
-    permission_classes = [permissions.AllowAny]
-    serializer_class = UserRegistrationSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+class SendSignupOTPView(APIView):
+    """POST auth/register/send-otp/ – Validate signup data, store pending, send 6-digit OTP to email."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        data = tokens_and_user_response(user)
-        data['message'] = 'Registration successful'
-        return Response(data, status=status.HTTP_201_CREATED)
+        payload = serializer.validated_data.copy()
+        payload.pop('password_confirm', None)
+        email = payload['email']
+        _, ok = create_and_send_signup_verification_otp(email, payload)
+        if not ok:
+            return Response(
+                {'email': ['Email already registered.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            {'message': 'Verification code sent to your email.'},
+            status=status.HTTP_200_OK,
+        )
+
+
+class VerifySignupAndRegisterView(APIView):
+    """POST auth/register/verify/ – Verify OTP and create account (User + profile)."""
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = VerifySignupOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+        payload = verify_signup_otp_and_get_payload(email, otp)
+        if payload is None:
+            return Response(
+                {'otp': ['Invalid or expired code.']},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = create_user_from_verified_signup_payload(payload)
+        except Exception as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        PendingRegistration.objects.filter(email=email).delete()
+        return Response({'message': 'Registration successful'}, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -195,13 +233,21 @@ class StudentProfileView(generics.RetrieveUpdateAPIView):
 
 
 class StudentListView(generics.ListAPIView):
-    """GET students/ – List students (mentors and admins)."""
+    """GET students/ – List students. Admins see all; mentors see only students whose target domains include the mentor's expertise domain."""
     serializer_class = StudentProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_administrator or self.request.user.is_mentor:
-            return StudentProfile.objects.select_related('user').all()
+        user = self.request.user
+        if user.is_administrator:
+            return StudentProfile.objects.select_related('user').prefetch_related('target_domains').all()
+        if user.is_mentor:
+            profile = getattr(user, 'mentor_profile', None)
+            if not profile or not profile.expertise_domain_id:
+                return StudentProfile.objects.none()
+            return StudentProfile.objects.filter(
+                target_domains=profile.expertise_domain
+            ).select_related('user').prefetch_related('target_domains').distinct()
         return StudentProfile.objects.none()
 
 

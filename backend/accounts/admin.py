@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, StudentProfile, MentorProfile, Domain, PasswordResetOTP
+from .models import User, StudentProfile, MentorProfile, Domain, PasswordResetOTP, PendingRegistration
 
 
 def only_superuser_can_delete(model_admin, request, obj=None):
@@ -17,14 +17,27 @@ class DomainAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('username', 'email', 'role', 'is_staff', 'is_superuser', 'is_active', 'created_at')
-    list_filter = ('role', 'is_active', 'is_staff', 'is_superuser', 'created_at')
+    list_display = ('username', 'email', 'role', 'is_email_verified', 'is_staff', 'is_superuser', 'is_active', 'created_at')
+    list_filter = ('role', 'is_active', 'is_email_verified', 'is_staff', 'is_superuser', 'created_at')
     search_fields = ('username', 'email')
     ordering = ('-created_at',)
 
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ('Role Information', {'fields': ('role',)}),
+    # Custom User has no first_name, last_name, date_joined – override fieldsets completely
+    fieldsets = (
+        (None, {'fields': ('email', 'username', 'password')}),
+        ('Role & verification', {'fields': ('role', 'is_email_verified')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        ('Important dates', {'fields': ('created_at',)}),
     )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'password1', 'password2'),
+        }),
+        ('Role & verification', {'fields': ('role', 'is_email_verified')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+    )
+    readonly_fields = ('created_at',)
 
     def has_delete_permission(self, request, obj=None):
         return only_superuser_can_delete(self, request, obj)
@@ -77,4 +90,12 @@ class PasswordResetOTPAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     search_fields = ('email',)
     readonly_fields = ('created_at',)
+
+
+@admin.register(PendingRegistration)
+class PendingRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('email', 'otp', 'expires_at', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('email',)
+    readonly_fields = ('created_at', 'signup_payload')
 

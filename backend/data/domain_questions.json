@@ -9261,7 +9261,7 @@
           "option_d": "The process of searching for new jobs",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Milestone' in a freelance contract?",
@@ -9271,7 +9271,7 @@
           "option_d": "A type of review given by a client",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Personal Branding' for freelancers?",
@@ -9281,7 +9281,7 @@
           "option_d": "Printing your name on a business card",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "Why is 'Time Tracking' important for hourly contracts?",
@@ -9291,7 +9291,7 @@
           "option_d": "To record the weather",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Value-Based Pricing'?",
@@ -9301,7 +9301,7 @@
           "option_d": "Charging the same as your competitors",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is an 'Agency' account on freelance platforms?",
@@ -9311,7 +9311,7 @@
           "option_d": "A free account with no fees",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is the best way to handle a 'Difficult Client'?",
@@ -9321,7 +9321,7 @@
           "option_d": "Give them a 1-star review immediately",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Retainer' in freelancing?",
@@ -9331,7 +9331,7 @@
           "option_d": "A type of backup storage",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Soft Skills' in freelancing?",
@@ -9341,7 +9341,7 @@
           "option_d": "Designing soft materials like clothing",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Upselling'?",
@@ -9351,7 +9351,7 @@
           "option_d": "Moving your office to a higher floor",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Client Retention'?",
@@ -9361,7 +9361,7 @@
           "option_d": "Storing client data in a database",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a 'Lead' in freelance marketing?",
@@ -9371,7 +9371,7 @@
           "option_d": "A type of electrical wire",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Cold Pitching'?",
@@ -9381,7 +9381,7 @@
           "option_d": "Asking for a job at a company you already work for",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'ROI' in the context of a client's project?",
@@ -9391,7 +9391,7 @@
           "option_d": "Return on Investment; the profit a client makes relative to what they paid you",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Invoicing'?",
@@ -9401,7 +9401,7 @@
           "option_d": "The process of sending a bill for completed work to a client",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a 'Non-Disclosure Agreement' (NDA)?",
@@ -9411,7 +9411,7 @@
           "option_d": "A legal contract that prohibits sharing confidential project information",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Passive Income' for freelancers?",
@@ -9421,7 +9421,7 @@
           "option_d": "Money earned from products like digital assets or courses that require little maintenance",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Outsourcing' for a freelancer?",
@@ -9431,7 +9431,7 @@
           "option_d": "Hiring another person or company to perform tasks for your own client project",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Social Proof'?",
@@ -9441,7 +9441,7 @@
           "option_d": "Evidence from others (reviews, testimonials) that your services are high quality",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Churn' in an agency or long-term freelance business?",
@@ -9451,7 +9451,7 @@
           "option_d": "The rate at which clients stop using your services over a given period",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         }
       ]
     },
@@ -9566,7 +9566,7 @@
           "option_d": "The title of a blog post only",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'CTR'?",
@@ -9576,7 +9576,7 @@
           "option_d": "Customer Time Record",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Bounce Rate'?",
@@ -9586,7 +9586,7 @@
           "option_d": "The number of emails that were not delivered",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'A/B Testing'?",
@@ -9596,7 +9596,7 @@
           "option_d": "Testing the software on two different computers",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Backlink'?",
@@ -9606,7 +9606,7 @@
           "option_d": "A hidden link in the code",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Conversion Optimization'?",
@@ -9616,7 +9616,7 @@
           "option_d": "Making a website load faster only",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Engagement' on social media?",
@@ -9626,7 +9626,7 @@
           "option_d": "The time you spend on the app",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Landing Page'?",
@@ -9636,7 +9636,7 @@
           "option_d": "A page that lists all products",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Remarketing' (Retargeting)?",
@@ -9646,7 +9646,7 @@
           "option_d": "Changing the brand name",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'SMM'?",
@@ -9656,7 +9656,7 @@
           "option_d": "Simple Media Module",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Domain Authority'?",
@@ -9666,7 +9666,7 @@
           "option_d": "The price of the domain name",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'LSI Keywords'?",
@@ -9676,7 +9676,7 @@
           "option_d": "Keywords that are hidden from users",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'CPA' in marketing?",
@@ -9686,7 +9686,7 @@
           "option_d": "Customer Price Average",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Native Advertising'?",
@@ -9696,7 +9696,7 @@
           "option_d": "Ads that match the look, feel, and function of the media format in which they appear",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Organic Traffic'?",
@@ -9706,7 +9706,7 @@
           "option_d": "Visitors who find your website through unpaid search results",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a 'Lookalike Audience'?",
@@ -9716,7 +9716,7 @@
           "option_d": "A way to reach new people who are similar to your existing customers",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Email Segmentation'?",
@@ -9726,7 +9726,7 @@
           "option_d": "The practice of dividing an email list into smaller groups based on specific criteria",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Inbound Marketing'?",
@@ -9736,7 +9736,7 @@
           "option_d": "A strategy that focuses on attracting customers through relevant and helpful content",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Alt Text' in image optimization?",
@@ -9746,7 +9746,7 @@
           "option_d": "A word or phrase that can be inserted as an attribute in an HTML document to tell website viewers the nature or contents of an image",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'CLV' (Customer Lifetime Value)?",
@@ -9756,7 +9756,7 @@
           "option_d": "The total amount of money a customer is expected to spend with your business during their lifetime",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         }
       ]
     },
@@ -9871,7 +9871,7 @@
           "option_d": "A tool for designing 2D logos",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Ray Casting'?",
@@ -9881,7 +9881,7 @@
           "option_d": "Changing the color of the sky",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Hitbox'?",
@@ -9891,7 +9891,7 @@
           "option_d": "A musical instrument in a game",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Level of Detail' (LOD)?",
@@ -9901,7 +9901,7 @@
           "option_d": "The price of the game",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Shading' in 3D graphics?",
@@ -9911,7 +9911,7 @@
           "option_d": "Deleting shadows to save memory",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Game Loop'?",
@@ -9921,7 +9921,7 @@
           "option_d": "The background music track",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Rigging' in 3D animation?",
@@ -9931,7 +9931,7 @@
           "option_d": "Connecting multiple servers",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Particle System'?",
@@ -9941,7 +9941,7 @@
           "option_d": "The atoms inside a computer chip",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'NavMesh'?",
@@ -9951,7 +9951,7 @@
           "option_d": "A type of internet connection",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Delta Time'?",
@@ -9961,7 +9961,7 @@
           "option_d": "The total time spent playing the game",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Procedural Generation'?",
@@ -9971,7 +9971,7 @@
           "option_d": "The process of hiring game testers",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Frustum Culling'?",
@@ -9981,7 +9981,7 @@
           "option_d": "Designing characters with no hair",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a 'Shader'?",
@@ -9991,7 +9991,7 @@
           "option_d": "A background artist",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Inverse Kinematics' (IK)?",
@@ -10001,7 +10001,7 @@
           "option_d": "A method of calculating the joint movements needed to place an end-effector (like a hand) in a specific position",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Spatial Partitioning'?",
@@ -10011,7 +10011,7 @@
           "option_d": "A way of organizing objects in a 3D space to speed up collision detection and rendering",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Occlusion Culling'?",
@@ -10021,7 +10021,7 @@
           "option_d": "Disabling the rendering of objects that are currently hidden by other objects",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Baking' in light mapping?",
@@ -10031,7 +10031,7 @@
           "option_d": "Pre-calculating lighting information and storing it in a texture for performance",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Draw Calls'?",
@@ -10041,7 +10041,7 @@
           "option_d": "The command the CPU sends to the GPU to render an object",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'State Machine' in game AI?",
@@ -10051,7 +10051,7 @@
           "option_d": "A model used to design the logic of an AI, where it transitions between different states (e.g., Idle, Attack)",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Vertex Shading' vs 'Fragment Shading'?",
@@ -10061,7 +10061,7 @@
           "option_d": "Vertex processes points in 3D space; Fragment processes individual pixels",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         }
       ]
     },
@@ -10176,7 +10176,7 @@
           "option_d": "The storage size of a block",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Genesis Block'?",
@@ -10186,7 +10186,7 @@
           "option_d": "A block containing all the money",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Proof of Work' (PoW)?",
@@ -10196,7 +10196,7 @@
           "option_d": "Sending an email to the network",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Proof of Stake' (PoS)?",
@@ -10206,7 +10206,7 @@
           "option_d": "A type of crypto trading strategy",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'DApp'?",
@@ -10216,7 +10216,7 @@
           "option_d": "A type of mobile game",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is an 'NFT'?",
@@ -10226,7 +10226,7 @@
           "option_d": "Next Fast Transaction",
           "correct_option": "B",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Cryptography' used for in blockchain?",
@@ -10236,7 +10236,7 @@
           "option_d": "To store the names of developers",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Private Key'?",
@@ -10246,7 +10246,7 @@
           "option_d": "The name of your wallet",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Public Key'?",
@@ -10256,7 +10256,7 @@
           "option_d": "The location of the miner",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is a 'Hard Fork'?",
@@ -10266,7 +10266,7 @@
           "option_d": "A backup of the blockchain",
           "correct_option": "C",
           "complexity": "MEDIUM",
-          "points": 2
+          "points": 1
         },
         {
           "text": "What is 'Solidity'?",
@@ -10276,7 +10276,7 @@
           "option_d": "A crypto trading platform",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a '51% Attack'?",
@@ -10286,7 +10286,7 @@
           "option_d": "A discount on transaction fees",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is a 'Layer 2' solution?",
@@ -10296,7 +10296,7 @@
           "option_d": "A team of developers",
           "correct_option": "C",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Sharding' in blockchain?",
@@ -10306,7 +10306,7 @@
           "option_d": "A type of database partitioning that spreads the load of the network across several nodes",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'ERC-20'?",
@@ -10316,7 +10316,7 @@
           "option_d": "A technical standard used for smart contracts on the Ethereum blockchain for implementing tokens",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is an 'Oracle' in blockchain?",
@@ -10326,7 +10326,7 @@
           "option_d": "A service that provides external data to smart contracts",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'EVM' (Ethereum Virtual Machine)?",
@@ -10336,7 +10336,7 @@
           "option_d": "The environment in which all Ethereum accounts and smart contracts live",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Zero-Knowledge Proof' (ZKP)?",
@@ -10346,7 +10346,7 @@
           "option_d": "A cryptographic method where one party can prove to another that they know a value without revealing it",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'DAO'?",
@@ -10356,7 +10356,7 @@
           "option_d": "Decentralized Autonomous Organization",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         },
         {
           "text": "What is 'Interoperability' in blockchain?",
@@ -10366,7 +10366,7 @@
           "option_d": "The ability of different blockchain networks to communicate and share data",
           "correct_option": "D",
           "complexity": "HARD",
-          "points": 3
+          "points": 1
         }
       ]
     }

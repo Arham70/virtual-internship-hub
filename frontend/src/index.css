@@ -40,8 +40,18 @@ code {
 }
 .auth-card input:not([type="checkbox"]):focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+.auth-card--student input:not([type="checkbox"]):focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+}
+.auth-card--mentor input:not([type="checkbox"]):focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+}
+.auth-card--admin input:not([type="checkbox"]):focus {
+  border-color: #475569;
+  box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.2);
 }
 .auth-card button[type="submit"] {
   border-radius: 0.5rem;

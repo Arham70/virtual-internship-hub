@@ -24,7 +24,12 @@ function ForgotPasswordForm({
   onBackToEmail,
   onBackToOtp,
   onBackToLogin,
+  accentClass = 'text-teal-600 hover:text-teal-700',
+  buttonClass = 'bg-teal-600 hover:bg-teal-700',
 }) {
+  const btnCls = `w-full py-3 rounded-lg ${buttonClass} text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2`;
+  const linkCls = accentClass;
+
   // Step 1: Enter email
   if (step === FORGOT_STEP.EMAIL) {
     return (
@@ -40,11 +45,7 @@ function ForgotPasswordForm({
           disabled={loading}
           icon={MailIcon}
         />
-        <button
-          type="submit"
-          className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2"
-          disabled={loading}
-        >
+        <button type="submit" className={btnCls} disabled={loading}>
           {loading ? (
             <>
               <Loader2Icon className="w-4 h-4 animate-spin" />
@@ -56,7 +57,7 @@ function ForgotPasswordForm({
         </button>
         <p className="text-center text-sm text-gray-600">
           Remember your password?{' '}
-          <button type="button" className="text-blue-600 hover:text-blue-700" onClick={onBackToLogin}>
+          <button type="button" className={linkCls} onClick={onBackToLogin}>
             Log in
           </button>
         </p>
@@ -70,11 +71,7 @@ function ForgotPasswordForm({
       <form onSubmit={onVerifyOtp} className="space-y-5">
         <p className="text-sm text-gray-600 text-center">We sent a 6-digit code to {email}. It expires in 2 minutes.</p>
         <OTPInput value={otp} onChange={onOtpChange} disabled={loading} />
-        <button
-          type="submit"
-          className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2"
-          disabled={loading}
-        >
+        <button type="submit" className={btnCls} disabled={loading}>
           {loading ? (
             <>
               <Loader2Icon className="w-4 h-4 animate-spin" />
@@ -85,11 +82,11 @@ function ForgotPasswordForm({
           )}
         </button>
         <p className="text-center text-sm text-gray-600">
-          <button type="button" className="text-blue-600 hover:text-blue-700" onClick={onResendOtp} disabled={loading}>
+          <button type="button" className={linkCls} onClick={onResendOtp} disabled={loading}>
             Resend OTP
           </button>
           {' · '}
-          <button type="button" className="text-blue-600 hover:text-blue-700 inline-flex items-center gap-1" onClick={onBackToEmail}>
+          <button type="button" className={`${linkCls} inline-flex items-center gap-1`} onClick={onBackToEmail}>
             <ArrowLeftIcon className="w-4 h-4 inline" />
             Back
           </button>
@@ -126,11 +123,7 @@ function ForgotPasswordForm({
         icon={LockIcon}
         showPasswordToggle
       />
-      <button
-        type="submit"
-        className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium disabled:opacity-70 flex items-center justify-center gap-2"
-        disabled={loading}
-      >
+      <button type="submit" className={btnCls} disabled={loading}>
         {loading ? (
           <>
             <Loader2Icon className="w-4 h-4 animate-spin" />
@@ -141,7 +134,7 @@ function ForgotPasswordForm({
         )}
       </button>
       <p className="text-center">
-        <button type="button" className="text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 text-sm" onClick={onBackToOtp}>
+        <button type="button" className={`${linkCls} inline-flex items-center gap-1 text-sm`} onClick={onBackToOtp}>
           <ArrowLeftIcon className="w-4 h-4" />
           Back
         </button>

@@ -67,11 +67,11 @@ def get_composed_questions(user) -> Tuple[List[dict], List[int]]:
 
 def compute_composed_score_and_recommend(
     answers: List[Tuple[int, str]]
-) -> Tuple[int, int, DomainScores, Optional[int]]:
+) -> Tuple[int, int, int, DomainScores, Optional[int]]:
     """
     Composed test: compute total score, per-domain scores, and one recommended domain (AI).
     answers: [(question_id, selected_option), ...]
-    Returns (score, total_points, per_domain_scores, recommended_domain_id).
+    Returns (score, total_points, correct_count, per_domain_scores, recommended_domain_id).
     """
     q_ids = [a[0] for a in answers]
     questions = {
@@ -81,6 +81,7 @@ def compute_composed_score_and_recommend(
     per_domain: DomainScores = {}
     total_score = 0
     total_points = 0
+    correct_count = 0
 
     for q_id, selected in answers:
         q = questions.get(q_id)
@@ -92,10 +93,11 @@ def compute_composed_score_and_recommend(
         correct = (selected or '').strip().upper() == (q.correct_option or '').strip().upper()
         if correct:
             total_score += pts
+            correct_count += 1
         if domain_id not in per_domain:
             per_domain[domain_id] = (0, 0)
         s, t = per_domain[domain_id]
         per_domain[domain_id] = (s + (pts if correct else 0), t + pts)
 
     recommended_id = recommend_one_domain(per_domain)
-    return total_score, total_points, per_domain, recommended_id
+    return total_score, total_points, correct_count, per_domain, recommended_id
