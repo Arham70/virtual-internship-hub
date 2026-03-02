@@ -220,6 +220,8 @@ class UserLoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError('Invalid email or password')
             if not user.is_active:
                 raise serializers.ValidationError('Account is disabled')
+            if (user.role == 'STUDENT' or user.role == 'MENTOR') and not user.is_email_verified:
+                raise serializers.ValidationError('Please verify your email before logging in.')
             attrs['user'] = user
         else:
             raise serializers.ValidationError('Email and password required')

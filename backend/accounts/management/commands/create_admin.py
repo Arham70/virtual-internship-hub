@@ -46,5 +46,7 @@ class Command(BaseCommand):
             password=password,
             role='ADMINISTRATOR',
         )
+        user.is_email_verified = True
+        user.save(update_fields=['is_email_verified'])
         self.stdout.write(self.style.SUCCESS(f'App administrator created: {user.email} (username: {user.username})'))
         self.stdout.write(self.style.SUCCESS('This user can log in to the app admin dashboard only (not Django /admin/).'))

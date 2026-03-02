@@ -162,7 +162,7 @@ function SignupForm({
             <FormInput
               id="mentor-username"
               label="Username"
-              placeholder="mentorjane"
+              placeholder="Choose a username (e.g. jane_smith)"
               value={mentorUsername}
               onChange={(e) => onMentorUsernameChange(e.target.value)}
               required
@@ -200,7 +200,7 @@ function SignupForm({
               </label>
               <textarea
                 id="professional-bio"
-                placeholder="Tell us about your experience..."
+                placeholder="Your background, expertise, and how you mentor (e.g. 5+ years in web dev)"
                 value={professionalBio}
                 onChange={(e) => onProfessionalBioChange(e.target.value)}
                 className={selectClass + ' min-h-[100px]'}

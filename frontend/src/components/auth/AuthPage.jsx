@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useDomains } from '../../hooks/useDomains';
@@ -67,6 +67,7 @@ export default function AuthPage(props) {
   const [signupStep, setSignupStep] = useState(SIGNUP_STEP.FORM);
   const [pendingSignupPayload, setPendingSignupPayload] = useState(null);
   const [signupOtp, setSignupOtp] = useState('');
+  const [signupVerifiedShowing, setSignupVerifiedShowing] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const roleLocked = propRole != null || (routeAuth != null);
@@ -105,11 +106,14 @@ export default function AuthPage(props) {
 
   const leftContent = useMemo(() => getLeftPanelContent(role, view), [role, view]);
   const cardContent = useMemo(() => {
+    if (view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP && signupVerifiedShowing) {
+      return { title: 'Email verified', subtitle: 'Redirecting you to login...' };
+    }
     if (view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP) {
       return { title: 'Verify your email', subtitle: `Enter the 6-digit code we sent to ${pendingSignupPayload?.email || ''}` };
     }
     return getCardTitleAndSubtitle(role, view);
-  }, [role, view, signupStep, pendingSignupPayload]);
+  }, [role, view, signupStep, pendingSignupPayload, signupVerifiedShowing]);
 
   const clearError = () => setError('');
 
@@ -219,14 +223,25 @@ export default function AuthPage(props) {
     setLoading(true);
     try {
       await authApi.verifySignupOtp({ email: pendingSignupPayload.email, otp: signupOtp });
-      const loginPath = role === ROLE.MENTOR ? '/mentor/login' : '/student/login';
-      navigate(loginPath, { state: { fromSignup: true } });
+      setLoading(false);
+      setSignupVerifiedShowing(true);
     } catch (err) {
       setError(getErrorMessage(err.response?.data || { message: 'Invalid or expired code.' }));
-    } finally {
       setLoading(false);
     }
   }
+
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+
+  useEffect(() => {
+    if (!signupVerifiedShowing) return;
+    const loginPath = role === ROLE.MENTOR ? '/mentor/login' : '/student/login';
+    const t = setTimeout(() => {
+      navigateRef.current(loginPath, { state: { fromSignup: true }, replace: true });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [signupVerifiedShowing, role]);
 
   async function handleResendSignupOtp() {
     setError('');
@@ -302,7 +317,25 @@ export default function AuthPage(props) {
           buttonClass={theme.buttonClass}
         />
       )}
-      {view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP && (
+      {view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP && signupVerifiedShowing && (
+        <div className="py-6 text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 text-green-600 mb-4">
+            <span className="text-2xl">✓</span>
+          </div>
+          <p className="text-gray-800 font-medium">Your email is verified.</p>
+          <p className="text-gray-600 text-sm mt-1">Redirecting you to the login page...</p>
+          <p className="mt-4">
+            <button
+              type="button"
+              onClick={() => navigateRef.current(role === ROLE.MENTOR ? '/mentor/login' : '/student/login', { state: { fromSignup: true }, replace: true })}
+              className={`text-sm font-medium underline ${theme.accentClass}`}
+            >
+              Go to login now
+            </button>
+          </p>
+        </div>
+      )}
+      {view === VIEW.SIGNUP && signupStep === SIGNUP_STEP.OTP && !signupVerifiedShowing && (
         <VerifySignupForm
           email={pendingSignupPayload?.email || ''}
           otp={signupOtp}

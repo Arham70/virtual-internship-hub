@@ -36,13 +36,6 @@ const NAV_ITEMS = [
   { id: 'portfolio', label: 'Portfolio', icon: FolderOpenIcon },
 ];
 
-// Mock beginner tasks (shown only after assessment passed)
-const MOCK_BEGINNER_TASKS = [
-  { id: 1, title: 'Build a Personal Portfolio Website', project: 'Portfolio Project', domain: 'Web Development', difficulty: 'Beginner', status: 'not-started', description: 'Create a simple portfolio using HTML, CSS, and basic JavaScript.' },
-  { id: 2, title: 'Create a Todo List App', project: 'React Fundamentals', domain: 'Web Development', difficulty: 'Beginner', status: 'not-started', description: 'Build a todo list with add, delete, and mark complete.' },
-  { id: 3, title: 'Design a Mobile App Wireframe', project: 'UI/UX Basics', domain: 'UI/UX Design', difficulty: 'Beginner', status: 'not-started', description: 'Create wireframes for a mobile app.' },
-];
-
 const CHATBOT_SUGGESTIONS = [
   'How do I start freelancing?',
   'What skills are in demand?',
@@ -366,7 +359,6 @@ function StudentDashboard() {
   const [, setAttemptCount] = useState(0);
   const [attemptCountToday, setAttemptCountToday] = useState(0); // from attempts list, for "X of 2 used today"
   const [lastAttempt, setLastAttempt] = useState(null);
-  const [tasksCompleted] = useState(0); // real data: replace with API when available
   const [showNotifications, setShowNotifications] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [assessmentView, setAssessmentView] = useState('idle'); // 'idle' | 'intro' | 'test' | 'result'
@@ -376,6 +368,9 @@ function StudentDashboard() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [assessmentError, setAssessmentError] = useState(null);
   const [result, setResult] = useState(null);
+  const [resultReviewing, setResultReviewing] = useState(false);
+  const [pendingResult, setPendingResult] = useState(null);
+  const [tasksCompleted] = useState(0); // real data: replace with API when available
 
   const loadAttempts = () => {
     studentApi.getAttempts()
@@ -447,15 +442,17 @@ function StudentDashboard() {
     setCurrentQuestionIndex((prev) => Math.min(prev + 1, (composedData?.questions?.length ?? 1) - 1));
   };
 
+  const REVIEW_DELAY_MS = 4000;
+
   const handleSubmitAssessment = () => {
     if (!composedData?.questions?.length) return;
     setSubmitLoading(true);
-    studentApi.submitComposedAssessment(
+    studentApi.submitComposedAssessmentML(
       buildAssessmentSubmitPayload(composedData.questions, selectedAnswers)
     )
       .then((res) => {
-        setResult(res.data);
-        setAssessmentView('result');
+        setPendingResult(res.data);
+        setResultReviewing(true);
         setAttemptCount((c) => c + 1);
         if (res.data.percentage >= PASSING_PERCENT) {
           setAssessmentPassed(true);
@@ -469,10 +466,23 @@ function StudentDashboard() {
       .finally(() => setSubmitLoading(false));
   };
 
+  useEffect(() => {
+    if (!resultReviewing || !pendingResult) return;
+    const t = setTimeout(() => {
+      setResult(pendingResult);
+      setAssessmentView('result');
+      setResultReviewing(false);
+      setPendingResult(null);
+    }, REVIEW_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [resultReviewing, pendingResult]);
+
   const handleBackToDashboard = () => {
     setAssessmentView('idle');
     setComposedData(null);
     setResult(null);
+    setPendingResult(null);
+    setResultReviewing(false);
     setSelectedAnswers([]);
     setCurrentQuestionIndex(0);
     setAssessmentError(null);
@@ -489,6 +499,17 @@ function StudentDashboard() {
           attemptCount={composedData.attempt_count ?? 0}
           maxAttempts={composedData.max_attempts ?? 2}
         />
+      );
+    }
+    if (resultReviewing) {
+      return (
+        <div className="quiz-screen-wrap">
+          <div className="quiz-card flex flex-col items-center justify-center gap-6 py-12" style={{ maxWidth: '28rem' }}>
+            <div className="w-14 h-14 rounded-full border-4 border-teal-200 border-t-teal-600 animate-spin" />
+            <h3 className="text-xl font-semibold text-gray-800">Reviewing your test</h3>
+            <p className="text-gray-600 text-sm text-center">Please wait a moment while we prepare your results.</p>
+          </div>
+        </div>
       );
     }
     if (assessmentView === 'test' && composedData?.questions?.length) {
@@ -778,26 +799,13 @@ function StudentDashboardHome({ studentName, targetDomains, assessmentPassed, la
         <div className="tasks-section-card">
           <div className="tasks-section-header">
             <div>
-              <h2 style={{ marginBottom: '0.35rem', color: '#0f172a', fontSize: '1.25rem', fontWeight: 600 }}>Recommended for You</h2>
-              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>Beginner level tasks based on your assessment and skills.</p>
+              <h2 style={{ marginBottom: '0.35rem', color: '#0f172a', fontSize: '1.25rem', fontWeight: 600 }}>Tasks unlocked</h2>
+              <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>Your tasks are unlocked. Go to My Tasks to see your recommended tasks.</p>
             </div>
-            <span className="task-badge beginner">Beginner</span>
+            <span className="task-badge beginner">Unlocked</span>
           </div>
-          <div style={{ padding: '1rem 1.5rem' }}>
-            {MOCK_BEGINNER_TASKS.map((task) => (
-              <div key={task.id} className="task-item-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div>
-                    <span className="task-badge beginner" style={{ marginRight: '0.5rem' }}>{task.difficulty}</span>
-                    <strong style={{ color: '#0f172a', fontWeight: 600 }}>{task.title}</strong>
-                  </div>
-                  <button type="button" className="btn-task-start">Start Task</button>
-                </div>
-                <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0.25rem 0' }}>{task.project} • {task.domain}</p>
-                <p style={{ fontSize: '0.875rem', color: '#475569', margin: 0, lineHeight: 1.45 }}>{task.description}</p>
-                <span className="task-badge not-started" style={{ marginTop: '0.5rem', display: 'inline-block' }}>Not Started</span>
-              </div>
-            ))}
+          <div style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+            <p style={{ color: '#0f766e', fontWeight: 500, margin: 0 }}>Your tasks are unlocked.</p>
           </div>
         </div>
       ) : (

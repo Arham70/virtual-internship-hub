@@ -1,5 +1,5 @@
 """
-Send emails via SMTP. Used for password reset OTP.
+Send emails via SMTP. Used for password reset OTP and signup verification.
 """
 import random
 import string
@@ -10,6 +10,19 @@ from datetime import timedelta
 
 
 from ..models import PasswordResetOTP, PendingRegistration, User
+
+EMAIL_DISPLAY_NAME = 'Virtual Internship Hub'
+
+
+def _get_from_email():
+    """Return From address with display name so inbox shows 'Virtual Internship Hub' not the raw email."""
+    raw = getattr(settings, 'DEFAULT_FROM_EMAIL', '') or getattr(settings, 'EMAIL_HOST_USER', 'noreply@example.com')
+    raw = (raw or '').strip()
+    if not raw:
+        return 'noreply@example.com'
+    if '<' in raw and '>' in raw:
+        return raw
+    return f'{EMAIL_DISPLAY_NAME} <{raw}>'
 
 
 def generate_otp(length=6):
@@ -44,7 +57,7 @@ def create_and_send_password_reset_otp(email):
         f'This code expires in {expire_minutes} minutes. Do not share it with anyone.\n\n'
         'If you did not request this, please ignore this email.'
     )
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+    from_email = _get_from_email()
     send_mail(
         subject,
         message,
@@ -101,7 +114,7 @@ def create_and_send_signup_verification_otp(email, signup_payload):
         f'This code expires in {expire_minutes} minutes. Do not share it.\n\n'
         'If you did not sign up, please ignore this email.'
     )
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+    from_email = _get_from_email()
     send_mail(subject, message, from_email, [email], fail_silently=False)
     return record, True
 
