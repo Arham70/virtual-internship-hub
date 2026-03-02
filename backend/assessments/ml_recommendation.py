@@ -62,6 +62,7 @@ def recommend_one_domain_ml(per_domain_scores: DomainScores) -> Optional[int]:
         X = [features]
         pred = model.predict(X)
         idx = int(pred[0])
+        # Model was trained on 3 features; with 2 domains we pad to 3, so idx can be 2 and out of range
         if 0 <= idx < len(domain_ids):
             return domain_ids[idx]
     except Exception:

@@ -20,7 +20,8 @@ export function getErrorMessage(error) {
   if (error.password?.[0]) return error.password[0];
   if (error.new_password?.[0]) return error.new_password[0];
   if (error.error) return typeof error.error === 'string' ? error.error : error.error[0];
-  if (error.detail) return error.detail;
+  if (error.answers?.[0]) return typeof error.answers[0] === 'string' ? error.answers[0] : String(error.answers[0]);
+  if (error.detail) return typeof error.detail === 'string' ? error.detail : (Array.isArray(error.detail) ? error.detail[0] : String(error.detail));
   if (error.message) return error.message;
   return 'Something went wrong.';
 }

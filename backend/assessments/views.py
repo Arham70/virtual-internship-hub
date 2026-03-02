@@ -197,25 +197,31 @@ class StudentComposedSubmitMLView(APIView):
         passed = percentage >= PASSING_PERCENT
         question_count = len(answers_data)
 
-        attempt = StudentAssessmentAttempt.objects.create(
-            user=request.user,
-            score=score,
-            total_points=total_points,
-            answers=serializer.validated_data['answers'],
-        )
-        if passed and recommended_domain_id is not None:
-            attempt.recommended_domains.set([recommended_domain_id])
-            profile = getattr(request.user, 'student_profile', None)
-            if profile:
-                profile.target_domains.add(recommended_domain_id)
-        q_ids = [a['question_id'] for a in answers_data]
-        domain_ids = list(
-            AssessmentQuestion.objects.filter(id__in=q_ids)
-            .values_list('domain_id', flat=True)
-            .distinct()
-        )
-        if domain_ids:
-            attempt.test_domains.set(domain_ids)
+        try:
+            attempt = StudentAssessmentAttempt.objects.create(
+                user=request.user,
+                score=score,
+                total_points=total_points,
+                answers=serializer.validated_data['answers'],
+            )
+            if passed and recommended_domain_id is not None:
+                attempt.recommended_domains.set([recommended_domain_id])
+                profile = getattr(request.user, 'student_profile', None)
+                if profile:
+                    profile.target_domains.add(recommended_domain_id)
+            q_ids = [a['question_id'] for a in answers_data]
+            domain_ids = list(
+                AssessmentQuestion.objects.filter(id__in=q_ids)
+                .values_list('domain_id', flat=True)
+                .distinct()
+            )
+            if domain_ids:
+                attempt.test_domains.set(domain_ids)
+        except Exception as e:
+            return Response(
+                {'error': str(e) if str(e) else 'Failed to save assessment. Please try again.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         result = AttemptResultSerializer(attempt)
         data = result.data

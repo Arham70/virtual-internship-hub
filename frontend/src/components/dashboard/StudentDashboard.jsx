@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { studentApi } from '../../api/student.api';
 import { getDomains } from '../../api/domains.api';
 import { buildProfileUpdatePayload, buildAssessmentSubmitPayload } from '../../services/student.service';
+import { getErrorMessage } from '../../utilities/authUtils';
 import {
   GraduationCapIcon,
   LayoutDashboardIcon,
@@ -461,7 +462,7 @@ function StudentDashboard() {
         }
       })
       .catch((err) => {
-        setAssessmentError(err.response?.data?.error || err.message || 'Submit failed.');
+        setAssessmentError(getErrorMessage(err.response?.data) || err.message || 'Submit failed.');
       })
       .finally(() => setSubmitLoading(false));
   };

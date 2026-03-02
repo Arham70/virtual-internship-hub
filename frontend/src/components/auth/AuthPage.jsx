@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useDomains } from '../../hooks/useDomains';
@@ -225,23 +225,16 @@ export default function AuthPage(props) {
       await authApi.verifySignupOtp({ email: pendingSignupPayload.email, otp: signupOtp });
       setLoading(false);
       setSignupVerifiedShowing(true);
+      // Schedule redirect in handler so it isn't cleared by effect cleanup (e.g. Strict Mode unmount)
+      const loginPath = role === ROLE.MENTOR ? '/mentor/login' : '/student/login';
+      setTimeout(() => {
+        navigate(loginPath, { state: { fromSignup: true }, replace: true });
+      }, 1500);
     } catch (err) {
       setError(getErrorMessage(err.response?.data || { message: 'Invalid or expired code.' }));
       setLoading(false);
     }
   }
-
-  const navigateRef = useRef(navigate);
-  navigateRef.current = navigate;
-
-  useEffect(() => {
-    if (!signupVerifiedShowing) return;
-    const loginPath = role === ROLE.MENTOR ? '/mentor/login' : '/student/login';
-    const t = setTimeout(() => {
-      navigateRef.current(loginPath, { state: { fromSignup: true }, replace: true });
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [signupVerifiedShowing, role]);
 
   async function handleResendSignupOtp() {
     setError('');
@@ -327,7 +320,7 @@ export default function AuthPage(props) {
           <p className="mt-4">
             <button
               type="button"
-              onClick={() => navigateRef.current(role === ROLE.MENTOR ? '/mentor/login' : '/student/login', { state: { fromSignup: true }, replace: true })}
+              onClick={() => navigate(role === ROLE.MENTOR ? '/mentor/login' : '/student/login', { state: { fromSignup: true }, replace: true })}
               className={`text-sm font-medium underline ${theme.accentClass}`}
             >
               Go to login now
